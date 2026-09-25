@@ -1,0 +1,19 @@
+<div class="bg-brique text-white">
+  <div class="mx-auto flex max-w-7xl items-center gap-3 overflow-hidden whitespace-nowrap px-10 py-2.5 text-sm font-semibold">
+
+    <!-- Pastille + libellé -->
+    <span class="flex items-center gap-2 font-bold uppercase">
+      <span class="h-2.5 w-2.5 rounded-full bg-white/70"></span>
+      Flash info
+    </span>
+
+    <!-- Un titre par élément du tableau "titres" -->
+    @for (titre of titres; track titre) {
+      <span>{{ titre }}</span>
+      @if (!$last) {
+        <span aria-hidden="true">·</span>
+      }
+    }
+
+  </div>
+</div>

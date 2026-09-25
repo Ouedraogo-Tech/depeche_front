@@ -1,0 +1,41 @@
+<header class="bg-creme">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-10 py-5">
+
+    <!-- Logo : trait rouge + nom du site -->
+    <a routerLink="/" class="flex items-center gap-3">
+      <span class="h-6 w-1 bg-brique"></span>
+      <span class="font-serif text-2xl font-bold text-marine">DÉPÊCHE 226</span>
+    </a>
+
+    <!-- Menu principal -->
+    <nav class="flex items-center gap-8 text-sm font-semibold uppercase tracking-wide">
+      <a
+        routerLink="/"
+        routerLinkActive="border-b-2 border-marine"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="pb-1"
+      >Accueil</a>
+      <!-- Liens ajoutés quand les pages existeront -->
+      <a class="flex cursor-pointer items-center gap-1 pb-1">Actualités <span class="text-xs">▾</span></a>
+      <a class="cursor-pointer pb-1">À propos</a>
+    </nav>
+
+    <!-- Recherche + Connexion -->
+    <div class="flex items-center gap-4">
+      <button
+        type="button"
+        aria-label="Rechercher"
+        class="flex h-10 w-10 items-center justify-center rounded-full border border-marine/30 hover:bg-white"
+      >
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+      </button>
+      <a class="cursor-pointer rounded-md bg-marine px-5 py-2.5 text-sm font-bold uppercase text-white hover:bg-marine-fonce">
+        Connexion
+      </a>
+    </div>
+
+  </div>
+</header>

@@ -1,0 +1,14 @@
+<div class="flex min-h-screen flex-col">
+   <app-header />
+   <app-flash-bar />
+
+
+  <!-- La page demandée s'affiche ici -->
+  <main class="flex-1 px-10 py-10">
+    <router-outlet />
+    <p class="font-serif text-3xl font-bold">Contenu de la page</p>
+  </main>
+
+  <!-- Emplacement du footer (remplacé au composant 4) -->
+  <div class="bg-marine-fonce px-10 py-10 text-white">FOOTER</div>
+</div>
