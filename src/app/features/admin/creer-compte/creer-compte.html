@@ -1,0 +1,63 @@
+<h1 class="font-serif text-3xl font-bold">Créer un compte</h1>
+<p class="mt-1 text-sm text-marine/70">Ajouter un membre du personnel et lui attribuer son rôle</p>
+
+<div class="mt-6 max-w-3xl">
+  <app-panel titre="Informations du compte">
+    <form [formGroup]="formulaire" (ngSubmit)="creer()" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+      <div>
+        <label for="prenom" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Prénom</label>
+        <input id="prenom" formControlName="prenom" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+        @if (aUneErreur('prenom')) { <p class="mt-1 text-xs text-brique">Le prénom est obligatoire.</p> }
+      </div>
+
+      <div>
+        <label for="nom" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Nom</label>
+        <input id="nom" formControlName="nom" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+        @if (aUneErreur('nom')) { <p class="mt-1 text-xs text-brique">Le nom est obligatoire.</p> }
+      </div>
+
+      <div>
+        <label for="email" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">E-mail</label>
+        <input id="email" type="email" formControlName="email" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+        @if (aUneErreur('email')) { <p class="mt-1 text-xs text-brique">Saisissez une adresse e-mail valide.</p> }
+      </div>
+
+      <div>
+        <label for="telephone" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Téléphone (facultatif)</label>
+        <input id="telephone" formControlName="telephone" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+      </div>
+
+      <div>
+        <label for="motDePasse" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Mot de passe provisoire</label>
+        <input id="motDePasse" type="password" formControlName="motDePasse" autocomplete="new-password" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+        @if (aUneErreur('motDePasse')) { <p class="mt-1 text-xs text-brique">6 caractères minimum.</p> }
+      </div>
+
+      <div>
+        <label for="typeUtilisateur" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Type de compte</label>
+        <select id="typeUtilisateur" formControlName="typeUtilisateur" class="w-full rounded-md border border-ligne bg-white px-3 py-2.5 text-sm focus:border-marine focus:outline-none">
+          @for (type of typesDeCompte; track type.valeur) {
+            <option [value]="type.valeur">{{ type.libelle }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Message d'erreur du backend -->
+      @if (erreur()) {
+        <p class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 md:col-span-2">{{ erreur() }}</p>
+      }
+
+      <!-- Boutons -->
+      <div class="flex justify-end gap-3 md:col-span-2">
+        <a routerLink="/admin/tableau-de-bord" class="rounded-md border border-marine px-5 py-2.5 text-xs font-bold uppercase text-marine">
+          Annuler
+        </a>
+        <button type="submit" [disabled]="enCours()" class="rounded-md bg-brique px-5 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 disabled:opacity-60">
+          {{ enCours() ? 'Création…' : 'Créer le compte' }}
+        </button>
+      </div>
+
+    </form>
+  </app-panel>
+</div>

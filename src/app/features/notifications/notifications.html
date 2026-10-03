@@ -1,0 +1,66 @@
+<!-- En-tête : empilé sur téléphone, sur une ligne à partir de sm -->
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Notifications</h1>
+    <p class="mt-1 text-sm text-marine/70">{{ nbNonLues() }} non lue(s) · cliquez sur une notification pour ouvrir la page concernée</p>
+  </div>
+  <button
+    type="button"
+    (click)="toutMarquerLu()"
+    [disabled]="nbNonLues() === 0"
+    class="self-start rounded-md border border-marine px-4 py-2.5 text-xs font-bold uppercase text-marine hover:bg-white disabled:opacity-40 sm:self-auto"
+  >
+    ✓ Tout marquer comme lu
+  </button>
+</div>
+
+<!-- Filtre -->
+<div class="mt-6 flex flex-wrap gap-2">
+  <button
+    type="button"
+    (click)="seulementNonLues.set(false)"
+    class="rounded-full border px-3.5 py-1.5 text-xs font-semibold"
+    [class]="!seulementNonLues() ? 'border-marine bg-marine text-white' : 'border-ligne bg-white text-marine hover:bg-creme'"
+  >Toutes ({{ notifications()?.length ?? 0 }})</button>
+  <button
+    type="button"
+    (click)="seulementNonLues.set(true)"
+    class="rounded-full border px-3.5 py-1.5 text-xs font-semibold"
+    [class]="seulementNonLues() ? 'border-marine bg-marine text-white' : 'border-ligne bg-white text-marine hover:bg-creme'"
+  >Non lues ({{ nbNonLues() }})</button>
+</div>
+
+@if (erreur()) {
+  <p class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+}
+
+@if (notifications() === undefined) {
+  <app-spinner />
+} @else {
+  <ul class="mt-4 space-y-2">
+    @for (n of lignes(); track n.id) {
+      <li>
+        <button
+          type="button"
+          (click)="ouvrir(n)"
+          class="flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left text-sm text-marine hover:shadow-sm"
+          [class]="styles[n.type].classes"
+          [class.opacity-70]="n.lue"
+        >
+          <span class="text-base leading-5">{{ styles[n.type].icone }}</span>
+          <span class="min-w-0 flex-1">
+            <span class="block break-words" [class.font-semibold]="!n.lue">{{ n.message }}</span>
+            <span class="mt-1 block text-xs text-marine/60">{{ n.dateCreation | date: 'd MMM y, HH:mm' }}</span>
+          </span>
+          @if (!n.lue) {
+            <span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-brique" aria-label="non lue"></span>
+          }
+        </button>
+      </li>
+    } @empty {
+      <li>
+        <app-empty-state icone="🔔" [message]="seulementNonLues() ? 'Aucune notification non lue.' : 'Aucune notification pour le moment.'" />
+      </li>
+    }
+  </ul>
+}

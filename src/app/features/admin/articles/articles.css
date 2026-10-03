@@ -1,0 +1,23 @@
+/* Barre "Publications par auteur" : s'étire de 0 jusqu'à sa largeur à l'arrivée sur la page */
+.barre-animee {
+  transform-origin: left;
+  animation: etirer 0.9s ease-out both;
+  transition: width 0.5s ease-out; /* si le nombre change (actualisation), la barre glisse au lieu de sauter */
+}
+
+@keyframes etirer {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Personnes sensibles aux animations (réglage du système) : pas d'animation */
+@media (prefers-reduced-motion: reduce) {
+  .barre-animee {
+    animation: none;
+    transition: none;
+  }
+}

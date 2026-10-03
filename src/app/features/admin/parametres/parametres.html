@@ -1,0 +1,114 @@
+<h1 class="font-serif text-2xl font-bold sm:text-3xl">Paramètres du site</h1>
+<p class="mt-1 text-sm text-marine/70">
+  @if (modifiable()) {
+    Informations affichées dans le pied de page de toutes les pages du site.
+  } @else {
+    Informations affichées dans le pied de page · lecture seule : elles sont modifiées par le webmaster.
+  }
+</p>
+
+@if (parametres() === undefined) {
+  <app-spinner />
+} @else if (parametres(); as p) {
+
+  @if (modifiable()) {
+    <!-- ===== WEBMASTER : formulaire + aperçu ===== -->
+    @if (erreur()) {
+      <p class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+    }
+
+    <!-- Téléphone : formulaire puis aperçu · grand écran : côte à côte (3/5 + 2/5) -->
+    <div class="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-5">
+      <app-panel titre="Modifier les paramètres" class="min-w-0 xl:col-span-3">
+        <form [formGroup]="formulaire" (ngSubmit)="enregistrer()" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label for="nomSite" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Nom du site *</label>
+            <input id="nomSite" formControlName="nomSite" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+            @if (aUneErreur('nomSite')) { <p class="mt-1 text-xs text-brique">Obligatoire, 100 caractères maximum.</p> }
+          </div>
+          <div>
+            <label for="emailContact" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">E-mail de contact</label>
+            <input id="emailContact" type="email" formControlName="emailContact" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+            @if (aUneErreur('emailContact')) { <p class="mt-1 text-xs text-brique">Adresse e-mail invalide.</p> }
+          </div>
+          <div>
+            <label for="telephone" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Téléphone</label>
+            <input id="telephone" formControlName="telephone" placeholder="+226 …" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+          </div>
+          <div>
+            <label for="ville" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Ville</label>
+            <input id="ville" formControlName="ville" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+          </div>
+          <div class="md:col-span-2">
+            <label for="adresse" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Adresse</label>
+            <input id="adresse" formControlName="adresse" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+          </div>
+          <div class="md:col-span-2">
+            <label for="slogan" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Slogan</label>
+            <textarea id="slogan" rows="2" formControlName="slogan" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"></textarea>
+            @if (aUneErreur('slogan')) { <p class="mt-1 text-xs text-brique">500 caractères maximum.</p> }
+          </div>
+          <div class="md:col-span-2">
+            <label for="mentionEdition" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Mention d'édition</label>
+            <input id="mentionEdition" formControlName="mentionEdition" placeholder="Ex. : Édité par …" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+          </div>
+
+          <div class="flex flex-col gap-3 sm:flex-row sm:justify-end md:col-span-2">
+            <button type="button" (click)="annuler()" [disabled]="formulaire.pristine" class="rounded-md border border-marine px-5 py-2.5 text-xs font-bold uppercase disabled:opacity-40">
+              Annuler les changements
+            </button>
+            <button type="submit" [disabled]="enCours() || formulaire.pristine" class="rounded-md bg-brique px-5 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 disabled:opacity-60">
+              {{ enCours() ? 'Enregistrement…' : 'Enregistrer' }}
+            </button>
+          </div>
+        </form>
+        @if (p.dateMiseAJour) {
+          <p class="mt-4 text-xs text-marine/50">Dernière modification : {{ p.dateMiseAJour | date: 'd MMMM y à HH:mm' }}</p>
+        }
+      </app-panel>
+
+      <!-- Aperçu du footer : suit le formulaire en direct -->
+      <div class="min-w-0 xl:col-span-2">
+        <p class="mb-2 text-xs font-bold uppercase tracking-wide text-marine/60">Aperçu du footer</p>
+        <div class="rounded-xl bg-marine-fonce p-6 text-white">
+          <p class="font-serif text-xl font-bold">{{ apercu().nomSite || 'Nom du site' }}</p>
+          @if (apercu().slogan) {
+            <p class="mt-2 text-sm text-white/70">{{ apercu().slogan }}</p>
+          }
+          <ul class="mt-4 space-y-1 break-words text-sm text-white/80">
+            @if (apercu().adresse || apercu().ville) {
+              <li>📍 {{ apercu().adresse }}{{ apercu().adresse && apercu().ville ? ', ' : '' }}{{ apercu().ville }}</li>
+            }
+            @if (apercu().telephone) { <li>☎ {{ apercu().telephone }}</li> }
+            @if (apercu().emailContact) { <li>✉ {{ apercu().emailContact }}</li> }
+          </ul>
+          @if (apercu().mentionEdition) {
+            <p class="mt-4 border-t border-white/10 pt-3 text-xs text-white/50">{{ apercu().mentionEdition }}</p>
+          }
+        </div>
+      </div>
+    </div>
+
+  } @else {
+    <!-- ===== ADMIN : lecture seule ===== -->
+    <div class="mt-6 max-w-3xl">
+      <app-panel titre="Paramètres généraux">
+        <dl class="grid grid-cols-1 gap-5 text-sm sm:grid-cols-2">
+          <div><dt class="text-xs font-bold uppercase text-marine/60">Nom du site</dt><dd class="mt-1">{{ p.nomSite }}</dd></div>
+          <div><dt class="text-xs font-bold uppercase text-marine/60">E-mail de contact</dt><dd class="mt-1 break-all">{{ p.emailContact || '—' }}</dd></div>
+          <div><dt class="text-xs font-bold uppercase text-marine/60">Téléphone</dt><dd class="mt-1">{{ p.telephone || '—' }}</dd></div>
+          <div><dt class="text-xs font-bold uppercase text-marine/60">Adresse</dt><dd class="mt-1">{{ p.adresse || '—' }}</dd></div>
+          <div><dt class="text-xs font-bold uppercase text-marine/60">Ville</dt><dd class="mt-1">{{ p.ville || '—' }}</dd></div>
+          <div><dt class="text-xs font-bold uppercase text-marine/60">Mention d'édition</dt><dd class="mt-1">{{ p.mentionEdition || '—' }}</dd></div>
+          <div class="sm:col-span-2"><dt class="text-xs font-bold uppercase text-marine/60">Slogan</dt><dd class="mt-1">{{ p.slogan || '—' }}</dd></div>
+        </dl>
+        @if (p.dateMiseAJour) {
+          <p class="mt-6 text-xs text-marine/50">Dernière modification : {{ p.dateMiseAJour | date: 'd MMMM y à HH:mm' }}</p>
+        }
+      </app-panel>
+    </div>
+  }
+
+} @else {
+  <p class="mt-10 rounded-xl border border-ligne bg-white p-6 text-center text-sm text-marine/60">Impossible de charger les paramètres.</p>
+}

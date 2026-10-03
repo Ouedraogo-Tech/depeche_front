@@ -1,0 +1,71 @@
+<div class="min-h-screen lg:flex">
+
+  <!-- Barre du haut : seulement sur téléphone / tablette (cachée à partir de lg) -->
+  <header class="sticky top-0 z-30 flex items-center justify-between bg-marine px-4 py-3 text-white lg:hidden">
+    <p class="font-serif text-lg font-bold">DÉPÊCHE 226</p>
+    <button type="button" (click)="menuOuvert.set(true)" aria-label="Ouvrir le menu" class="rounded-md p-2 hover:bg-white/10">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </header>
+
+  <!-- Fond sombre derrière le menu ouvert (téléphone) : un appui dessus referme le menu -->
+  @if (menuOuvert()) {
+    <div class="fixed inset-0 z-40 bg-marine/50 lg:hidden" (click)="menuOuvert.set(false)"></div>
+  }
+
+  <!-- Barre latérale : tiroir qui glisse sur téléphone, fixe à gauche sur ordinateur -->
+  <aside
+    class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-marine px-4 py-6 text-white transition-transform duration-200
+           lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:w-60 lg:shrink-0 lg:translate-x-0"
+    [class.-translate-x-full]="!menuOuvert()"
+  >
+    <div class="flex items-start justify-between px-2">
+      <div>
+        <p class="font-serif text-xl font-bold">DÉPÊCHE 226</p>
+        <p class="text-[11px] uppercase tracking-wider text-white/60">{{ espace().titre }}</p>
+      </div>
+      <!-- Bouton fermer : seulement sur téléphone -->
+      <button type="button" (click)="menuOuvert.set(false)" aria-label="Fermer le menu" class="rounded-md p-1 text-xl leading-none hover:bg-white/10 lg:hidden">
+        ✕
+      </button>
+    </div>
+
+    <!-- Carte de l'utilisateur connecté -->
+    @if (utilisateur(); as u) {
+      <div class="mt-5 flex items-center gap-3 rounded-lg bg-white/10 px-3 py-2.5">
+        <app-avatar [prenom]="u.prenom" [nom]="u.nom" [photo]="photo()" taille="sm" />
+        <span class="truncate text-sm font-semibold">{{ u.prenom }} {{ u.nom }}</span>
+      </div>
+    }
+
+    <!-- Menu : choisir une page referme le tiroir sur téléphone -->
+    <nav class="mt-5 flex flex-col gap-1 overflow-y-auto">
+      @for (lien of espace().menu; track lien.chemin) {
+        <a
+          [routerLink]="lien.chemin"
+          routerLinkActive="bg-brique font-semibold"
+          (click)="menuOuvert.set(false)"
+          class="flex items-center justify-between gap-2 rounded-lg px-4 py-2.5 text-sm text-white/90"
+        >
+          {{ lien.libelle }}
+          <!-- Badge : nombre de notifications non lues -->
+          @if (lien.chemin.endsWith('/notifications') && nonLues() > 0) {
+            <span class="min-w-6 rounded-full bg-white px-1.5 text-center text-xs font-bold text-brique">{{ nonLues() }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <button type="button" (click)="deconnecter()" class="mt-auto px-4 py-2 text-left text-sm text-red-300 hover:text-red-200">
+      ↪ Déconnexion
+    </button>
+  </aside>
+
+  <!-- La page demandée : marges plus petites sur téléphone -->
+  <main class="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
+    <router-outlet />
+  </main>
+
+</div>

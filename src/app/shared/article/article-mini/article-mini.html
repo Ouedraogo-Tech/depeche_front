@@ -1,0 +1,19 @@
+<!-- Toute la vignette est un seul lien cliquable -->
+<a [routerLink]="['/articles', article().id]" class="group flex gap-3 rounded-lg p-2 transition hover:bg-creme">
+  <!-- Cadre de l'image : fond sable visible si pas d'image ou image introuvable -->
+  <span class="block h-16 w-24 shrink-0 overflow-hidden rounded-md bg-sable">
+    @if (article().image; as image) {
+      <img appImageSecours [src]="image" alt="" loading="lazy" class="h-full w-full object-cover" />
+    }
+  </span>
+
+  <span class="min-w-0">
+    <span class="block text-[11px] font-bold uppercase tracking-wide text-brique">
+      {{ article().categorieNom }} · {{ article().datePublication | date: 'dd.MM' }}
+    </span>
+    <!-- line-clamp-2 : titre coupé proprement après 2 lignes -->
+    <span class="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug group-hover:underline">
+      {{ article().titre }}
+    </span>
+  </span>
+</a>

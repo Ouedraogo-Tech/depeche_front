@@ -10,3 +10,17 @@ export interface AbonneNewsletter {
 export interface AbonnementRequest {
   email: string;
 }
+
+// Ce que le webmaster envoie pour expédier la newsletter (POST /api/newsletter/envoyer)
+export interface EnvoiNewsletter {
+  objet: string;
+  abonneIds: number[];
+  articleIds: number[];
+}
+
+// Réponse de l'envoi : combien d'e-mails sont partis, lesquels ont échoué
+export interface ResultatEnvoi {
+  envoyes: number;
+  echecs: number;
+  adressesEnEchec: string[];
+}

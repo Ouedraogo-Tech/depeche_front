@@ -1,0 +1,150 @@
+<div class="mx-auto max-w-7xl">
+
+  @if (motRecherche()) {
+    <!-- ======================= MODE RECHERCHE ======================= -->
+    <p class="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-brique">Recherche</p>
+    <h1 class="mt-1 break-words text-center font-serif text-3xl font-bold sm:text-4xl">« {{ motRecherche() }} »</h1>
+        <!-- Nombre de résultats (seulement s'il y en a) -->
+    @if (articles(); as liste) {
+      @if (liste.length > 0) {
+        <p class="mt-2 text-center text-sm text-marine/70">{{ liste.length }} article(s) trouvé(s)</p>
+      }
+    }
+
+    @if (articles() === null) {
+      <app-spinner texte="Recherche en cours…" />
+    } @else {
+      <!-- 1 carte par ligne sur téléphone, 2 sur tablette, 3 sur ordinateur -->
+      <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        @for (a of articles(); track a.id) {
+          <app-article-card [article]="a" />
+        } @empty {
+          <p class="rounded-xl border border-ligne bg-white px-4 py-8 text-center text-sm text-marine/60 sm:col-span-2 lg:col-span-3">
+            Aucun article ne correspond à « {{ motRecherche() }} ». Essayez un autre mot, ou parcourez les rubriques.
+          </p>
+        }
+      </div>
+    }
+
+  } @else {
+    <!-- ======================= MODE ACCUEIL / RUBRIQUE ======================= -->
+
+    <!-- Titre : "À la une" ou le nom de la rubrique -->
+    <p class="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-brique">
+      @if (rubriqueActive()) { Rubrique } @else { Burkina Faso · {{ aujourdhui | date: 'd MMMM y' | uppercase }} }
+    </p>
+    <h1 class="mt-1 text-center font-serif text-3xl font-bold sm:text-4xl">{{ rubriqueActive()?.nom ?? 'À la une' }}</h1>
+    @if (rubriqueActive()?.description; as description) {
+      <p class="mx-auto mt-2 max-w-2xl text-center text-sm text-marine/70">{{ description }}</p>
+    }
+
+    <!-- Pastilles des rubriques : défilent horizontalement sur téléphone -->
+    @if (categories().length > 0) {
+      <div class="-mx-4 mt-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+        <div class="mx-auto flex w-max gap-2">
+          <a
+            routerLink="/"
+            class="whitespace-nowrap rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-wide"
+            [class]="!rubriqueActive() ? 'border-marine bg-marine text-white' : 'border-sable bg-white text-marine hover:border-marine'"
+          >Toutes</a>
+          @for (c of categories(); track c.id) {
+            <a
+              routerLink="/"
+              [queryParams]="{ rubrique: c.id }"
+              class="whitespace-nowrap rounded-full border px-4 py-1.5 text-xs font-bold uppercase tracking-wide"
+              [class]="rubriqueActive()?.id === c.id ? 'border-brique bg-brique text-white' : 'border-sable bg-white text-marine hover:border-marine'"
+            >{{ c.nom }}</a>
+          }
+        </div>
+      </div>
+    }
+
+    @if (articles() === null) {
+      <app-spinner texte="Chargement des actualités…" />
+    } @else if (aLaUne(); as une) {
+      <div class="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-3">
+
+        <!-- Le grand article (2 colonnes sur 3 à partir de lg) -->
+        <article class="lg:col-span-2">
+          <a [routerLink]="['/articles', une.id]" class="block aspect-[16/9] overflow-hidden rounded-xl bg-sable">
+            @if (une.image; as image) {
+              <img
+                [src]="image"
+                [alt]="une.titre"
+                (error)="$any($event.target).style.display = 'none'"
+                class="h-full w-full object-cover"
+              />
+            }
+          </a>
+          <p class="mt-4 text-[11px] font-bold uppercase tracking-wide text-brique">
+            {{ une.categorieNom }} · {{ une.datePublication | date: 'd MMM y' | uppercase }}
+          </p>
+          <h2 class="mt-2 font-serif text-2xl font-bold leading-tight sm:text-3xl">
+            <a [routerLink]="['/articles', une.id]" class="hover:underline">{{ une.titre }}</a>
+          </h2>
+          <p class="mt-3 text-marine/80">{{ une.resume || (une.contenu | slice: 0 : 220) + '…' }}</p>
+          <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-marine/60">
+            <span>Par <strong class="text-marine">{{ une.auteurNomComplet }}</strong> · {{ une.contenu | tempsLecture }}</span>
+            <a [routerLink]="['/articles', une.id]" class="font-bold uppercase text-brique">Lire plus →</a>
+          </div>
+        </article>
+
+        <!-- Les 3 articles secondaires : vignettes agrandies -->
+        <div class="divide-y divide-ligne">
+          @for (a of secondaires(); track a.id) {
+            <article class="flex gap-4 py-5 first:pt-0">
+              <a
+                [routerLink]="['/articles', a.id]"
+                class="block aspect-[4/3] w-32 shrink-0 overflow-hidden rounded-lg bg-sable sm:w-44 lg:w-40 xl:w-48"
+              >
+                @if (a.image; as image) {
+                  <img
+                    [src]="image"
+                    alt=""
+                    loading="lazy"
+                    (error)="$any($event.target).style.display = 'none'"
+                    class="h-full w-full object-cover"
+                  />
+                }
+              </a>
+              <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wide text-brique">
+                  {{ a.categorieNom }} · {{ a.datePublication | date: 'dd.MM' }}
+                </p>
+                <h3 class="mt-1 line-clamp-3 text-base font-semibold leading-snug sm:text-lg">
+                  <a [routerLink]="['/articles', a.id]" class="hover:underline">{{ a.titre }}</a>
+                </h3>
+                <a [routerLink]="['/articles', a.id]" class="mt-2 inline-block text-xs font-bold uppercase text-brique">Lire plus →</a>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    } @else {
+      <p class="mt-10 rounded-xl border border-ligne bg-white px-4 py-8 text-center text-sm text-marine/60">
+        {{ rubriqueActive() ? 'Aucun article publié dans cette rubrique pour le moment.' : 'Aucun article publié pour le moment.' }}
+      </p>
+    }
+
+    <!-- ===== DERNIÈRES ACTUALITÉS ===== -->
+    @if (dernieres().length > 0) {
+      <p class="mt-16 text-center text-[11px] font-bold uppercase tracking-[0.2em] text-brique">Fil continu</p>
+      <h2 class="mt-1 text-center font-serif text-2xl font-bold sm:text-3xl">Dernières actualités</h2>
+
+      <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        @for (a of dernieres(); track a.id) {
+          <app-article-card [article]="a" />
+        }
+      </div>
+
+      @if (encoreDesArticles()) {
+        <div class="mt-8 text-center">
+          <button type="button" (click)="voirPlus()" class="rounded-md border border-marine px-6 py-3 text-xs font-bold uppercase hover:bg-white">
+            Voir plus ↓
+          </button>
+        </div>
+      }
+    }
+  }
+
+</div>

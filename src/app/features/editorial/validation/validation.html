@@ -1,0 +1,102 @@
+<h1 class="font-serif text-2xl font-bold sm:text-3xl">Validation des articles</h1>
+<p class="mt-1 text-sm text-marine/70">Les articles soumis par les journalistes, du plus ancien au plus récent</p>
+
+
+@if (file(); as liste) {
+  <!-- Grand écran : liste (1/3) + article (2/3) · téléphone : l'un OU l'autre -->
+  <div class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+
+    <!-- ===== La file d'attente ===== -->
+    <ul class="space-y-2 lg:block" [class.hidden]="!!selection()">
+      <li class="text-xs font-bold uppercase tracking-wide text-marine/60">{{ liste.length }} en attente</li>
+      @for (a of liste; track a.id) {
+        <li>
+          <button
+            type="button"
+            (click)="ouvrir(a)"
+            class="block w-full rounded-xl border bg-white p-3 text-left hover:border-marine"
+            [class]="a.id === selectionId() ? 'border-marine ring-1 ring-marine' : 'border-ligne'"
+          >
+            <span class="block font-semibold">{{ a.titre }}</span>
+            <span class="mt-0.5 block text-xs text-marine/60">{{ a.auteurNomComplet }} · {{ a.categorieNom }}</span>
+            <span class="mt-0.5 block text-xs text-marine/50">Soumis le {{ a.dateCreation | date: 'd MMM y, HH:mm' }}</span>
+          </button>
+        </li>
+      } @empty {
+        <li class="rounded-xl border border-ligne bg-white p-6 text-center text-sm text-marine/60">✓ Aucun article en attente.</li>
+      }
+    </ul>
+
+    <!-- ===== L'article ouvert + la décision ===== -->
+    <div class="min-w-0 lg:col-span-2 lg:block" [class.hidden]="!selection()">
+      @if (selection(); as a) {
+        <button type="button" (click)="fermer()" class="mb-3 text-xs font-bold uppercase tracking-wide text-marine/60 hover:text-marine lg:hidden">
+          ← Retour à la liste
+        </button>
+
+        <article class="rounded-xl border border-ligne bg-white p-5 sm:p-8">
+          <p class="text-xs font-bold uppercase tracking-wide text-brique">{{ a.categorieNom }}</p>
+          <h2 class="mt-2 font-serif text-2xl font-bold sm:text-3xl">{{ a.titre }}</h2>
+          <p class="mt-2 text-sm text-marine/60">
+            Par <strong class="text-marine">{{ a.auteurNomComplet }}</strong> · soumis le {{ a.dateCreation | date: 'd MMMM y, HH:mm' }} · {{ a.contenu | tempsLecture }}
+          </p>
+          @if (a.resume) {
+            <p class="mt-4 text-lg text-marine/80">{{ a.resume }}</p>
+          }
+          @if (a.image; as image) {
+            <img [src]="image" alt="" class="mt-5 aspect-video w-full rounded-lg object-cover" (error)="$any($event.target).style.display = 'none'" />
+          }
+          <div class="mt-5 whitespace-pre-line break-words leading-relaxed">{{ a.contenu }}</div>
+        </article>
+
+        <!-- Décision -->
+        <div class="mt-4 rounded-xl border border-ligne bg-white p-5">
+          <label for="commentaire" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">
+            Commentaire pour le journaliste
+          </label>
+          <textarea
+            id="commentaire"
+            rows="3"
+            placeholder="Facultatif pour valider · obligatoire pour demander une modification ou refuser"
+            [value]="commentaire()"
+            (input)="commentaire.set($any($event.target).value)"
+            class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+          ></textarea>
+
+          @if (erreur()) {
+            <p class="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+          }
+
+          <!-- Boutons : empilés sur téléphone, en ligne à partir de sm -->
+          <div class="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <button type="button" (click)="decider('REFUSER')" [disabled]="enCours()" class="rounded-md border border-brique px-4 py-2.5 text-xs font-bold uppercase text-brique hover:bg-red-50 disabled:opacity-50">
+              Refuser
+            </button>
+            <button type="button" (click)="decider('MODIFIER')" [disabled]="enCours()" class="rounded-md border border-marine px-4 py-2.5 text-xs font-bold uppercase text-marine hover:bg-creme disabled:opacity-50">
+              Demander une modification
+            </button>
+            <button type="button" (click)="decider('VALIDER')" [disabled]="enCours()" class="rounded-md bg-green-700 px-4 py-2.5 text-xs font-bold uppercase text-white hover:bg-green-800 disabled:opacity-50">
+              {{ enCours() ? 'Envoi…' : 'Valider et publier' }}
+            </button>
+          </div>
+        </div>
+
+        @if (confirmerValidation()) {
+          <app-confirm-dialog
+            titre="Publier cet article ?"
+            [message]="'« ' + a.titre + ' » sera visible immédiatement sur le site.'"
+            libelleConfirmer="Publier"
+            (confirme)="decider('VALIDER')"
+            (annule)="confirmerValidation.set(false)"
+          />
+        }
+      } @else {
+        <p class="hidden rounded-xl border border-dashed border-sable bg-white p-10 text-center text-sm text-marine/60 lg:block">
+          ← Choisissez un article dans la liste pour le lire.
+        </p>
+      }
+    </div>
+  </div>
+} @else {
+  <app-spinner />
+}

@@ -1,0 +1,65 @@
+<!-- En-tête -->
+<p class="text-xs font-bold uppercase tracking-wide text-marine/60">
+  Webmaster · {{ aujourdhui | date: 'd MMMM y' | uppercase }}
+</p>
+<h1 class="font-serif text-2xl font-bold sm:text-3xl">Tableau de bord</h1>
+
+<!-- Les 4 cartes : 1 / 2 / 4 par ligne -->
+@if (statistiques(); as s) {
+  <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <app-stat-card [valeur]="s.totalCommentaires" libelle="Commentaires" detail="sur tout le site" />
+    <app-stat-card [valeur]="s.commentairesMasques" libelle="Masqués" detail="par la modération" [accent]="s.commentairesMasques > 0" />
+    <app-stat-card [valeur]="s.abonnesActifs" libelle="Abonnés" detail="newsletter" />
+    <app-stat-card [valeur]="nbPublies()" libelle="Articles en ligne" />
+  </div>
+} @else if (statistiques() === null) {
+  <p class="mt-6 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">Impossible de charger les statistiques.</p>
+} @else {
+  <app-spinner />
+}
+
+<!-- Téléphone : empilés · grand écran : commentaires (2/3) + footer (1/3) -->
+<div class="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+  <!-- Derniers commentaires -->
+  <app-panel titre="Derniers commentaires" class="min-w-0 xl:col-span-2">
+    <a actions routerLink="/webmaster/moderation" class="whitespace-nowrap text-xs font-bold uppercase text-brique hover:underline">Modérer →</a>
+
+    <ul class="divide-y divide-ligne">
+      @for (c of derniersCommentaires(); track c.id) {
+        <li class="py-3">
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-marine/60">
+            <span class="font-semibold text-marine">{{ c.auteurNomComplet }}</span>
+            <span>· {{ c.dateCreation | date: 'd MMM, HH:mm' }}</span>
+            <app-status-badge [statut]="c.statut" />
+          </div>
+          <!-- line-clamp-2 : 2 lignes maximum, puis "…" -->
+          <p class="mt-1 line-clamp-2 break-words text-sm">{{ c.contenu }}</p>
+          <p class="mt-1 truncate text-xs text-marine/50">Sur : {{ c.articleTitre }}</p>
+        </li>
+      } @empty {
+        <li class="py-6 text-center text-sm text-marine/60">Aucun commentaire pour le moment.</li>
+      }
+    </ul>
+  </app-panel>
+
+  <!-- Aperçu du footer -->
+  <app-panel titre="Footer du site" class="min-w-0">
+    <a actions routerLink="/webmaster/parametres" class="whitespace-nowrap text-xs font-bold uppercase text-brique hover:underline">Modifier →</a>
+
+    @if (parametres(); as p) {
+      <dl class="space-y-3 text-sm">
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Nom du site</dt><dd class="mt-0.5">{{ p.nomSite }}</dd></div>
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Contact</dt><dd class="mt-0.5 break-all">{{ p.emailContact || '—' }}</dd></div>
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Téléphone</dt><dd class="mt-0.5">{{ p.telephone || '—' }}</dd></div>
+        <div>
+          <dt class="text-xs font-bold uppercase text-marine/60">Dernière mise à jour</dt>
+          <dd class="mt-0.5">{{ p.dateMiseAJour ? (p.dateMiseAJour | date: 'd MMM y, HH:mm') : '—' }}</dd>
+        </div>
+      </dl>
+    } @else if (parametres() === null) {
+      <p class="text-sm text-marine/60">Paramètres indisponibles.</p>
+    } @else {
+      <app-spinner />
+    }
+  </app-panel>
+</div>

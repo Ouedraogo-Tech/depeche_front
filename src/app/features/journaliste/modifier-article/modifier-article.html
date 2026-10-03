@@ -1,0 +1,50 @@
+<a [routerLink]="retourMesArticles" class="text-xs font-bold uppercase tracking-wide text-marine/60 hover:text-marine">← Mes articles</a>
+
+@if (article() === undefined) {
+  <app-spinner />
+} @else if (article(); as a) {
+  <div class="mt-4 flex flex-wrap items-center gap-3">
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Modifier l'article</h1>
+    <app-status-badge [statut]="a.statut" />
+  </div>
+
+  <!-- Le retour du responsable éditorial : on l'affiche en haut pour corriger en le lisant -->
+  @if (a.commentaireEditorial && (a.statut === 'A_REVISER' || a.statut === 'REFUSE')) {
+    <div class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <p class="font-bold">Retour du responsable éditorial :</p>
+      <p class="mt-1 whitespace-pre-line">{{ a.commentaireEditorial }}</p>
+    </div>
+  }
+
+  <!-- Article déjà en ligne : on prévient que les changements seront visibles tout de suite -->
+  @if (a.statut === 'PUBLIE') {
+    <div class="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      Cet article est <strong>en ligne</strong> : vos modifications seront visibles immédiatement sur le site.
+    </div>
+  }
+
+  @if (modifiable()) {
+    <div class="mt-6">
+      <app-panel titre="Contenu de l'article">
+        <!-- Article publié : seulement "Enregistrer les modifications" (il reste en ligne) -->
+        <app-article-form
+          [categories]="categories()"
+          [article]="a"
+          [boutonSoumettre]="boutonSoumettre() && a.statut !== 'PUBLIE'"
+          [boutonPublier]="a.statut !== 'PUBLIE'"
+          [enCours]="enCours()"
+          [erreur]="erreur()"
+          (brouillon)="enregistrer($event)"
+          (soumission)="enregistrerEtSoumettre($event)"
+          (publication)="enregistrerEtPublier($event)"
+        />
+      </app-panel>
+    </div>
+  } @else {
+    <p class="mt-6 rounded-xl border border-ligne bg-white p-6 text-center text-sm text-marine/70">
+      Cet article ne peut pas être modifié pour le moment : il est en relecture, planifié ou archivé.
+    </p>
+  }
+} @else {
+  <p class="mt-10 rounded-xl border border-ligne bg-white p-6 text-center text-sm text-marine/60">Article introuvable.</p>
+}

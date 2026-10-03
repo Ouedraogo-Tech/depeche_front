@@ -1,19 +1,29 @@
-<div class="bg-brique text-white">
-  <div class="mx-auto flex max-w-7xl items-center gap-3 overflow-hidden whitespace-nowrap px-10 py-2.5 text-sm font-semibold">
+<!-- Le bandeau n'apparaît que s'il y a au moins un article publié -->
+@if (titreCourant(); as t) {
+        <!-- mt-2 sur téléphone, mt-3 à partir de sm : un peu d'air entre la barre rouge et la flash-bar -->
+  <div class="mt-2 bg-marine-fonce text-white sm:mt-3">
+    <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 text-xs font-semibold sm:px-6 sm:text-sm lg:px-10">
 
-    <!-- Pastille + libellé -->
-    <span class="flex items-center gap-2 font-bold uppercase">
-      <span class="h-2.5 w-2.5 rounded-full bg-white/70"></span>
-      Flash info
-    </span>
+      <!-- Pastille qui clignote + libellé (ne bouge pas) -->
+      <span class="flex shrink-0 items-center gap-2 font-bold uppercase">
+        <span class="h-2.5 w-2.5 animate-pulse rounded-full bg-brique"></span>
+        Flash info
+      </span>
 
-    <!-- Un titre par élément du tableau "titres" -->
-    @for (titre of titres; track titre) {
-      <span>{{ titre }}</span>
-      @if (!$last) {
-        <span aria-hidden="true">·</span>
-      }
-    }
+      <!-- Zone de passage : le titre y entre à droite et en sort à gauche -->
+      <div class="bandeau relative h-5 min-w-0 flex-1 overflow-hidden">
+        <!-- Passage pair → animation "traverser-a", impair → "traverser-b" :
+             changer le NOM de l'animation oblige le navigateur à la rejouer depuis le début -->
+        <a
+          [routerLink]="['/articles', t.id]"
+          class="titre absolute top-0 whitespace-nowrap hover:underline"
+          [class.pair]="passage() % 2 === 0"
+          [class.impair]="passage() % 2 === 1"
+          [style.animation-duration]="duree()"
+          (animationend)="suivant()"
+        >{{ t.titre }}</a>
+      </div>
 
+    </div>
   </div>
-</div>
+}

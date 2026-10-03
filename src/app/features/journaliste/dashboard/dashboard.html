@@ -1,0 +1,102 @@
+<!-- En-tête : empilé sur téléphone, sur une ligne à partir de sm -->
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <p class="text-xs font-bold uppercase tracking-wide text-marine/60">
+      Back-office · {{ aujourdhui | date: 'd MMMM y' | uppercase }}
+    </p>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Tableau de bord</h1>
+  </div>
+  <a
+    routerLink="/journaliste/nouvel-article"
+    class="self-start rounded-md bg-brique px-4 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 sm:self-auto"
+  >
+    + Nouvel article
+  </a>
+</div>
+
+<!-- Les 4 cartes : 1 / 2 / 4 par ligne -->
+<div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <app-stat-card [valeur]="nbPublies()" libelle="Articles publiés" [detail]="'+' + nbPubliesCeMois() + ' ce mois-ci'" />
+  <app-stat-card [valeur]="nbBrouillons()" libelle="Brouillons" />
+  <app-stat-card [valeur]="nbEnAttente()" libelle="En attente" detail="Relecture du desk" [accent]="true" />
+  <app-stat-card [valeur]="nbNonLues()" libelle="Notifications" detail="Non lues" [accent]="true" />
+</div>
+
+<!-- Notifications récentes (un clic = marquée comme lue) -->
+<h2 class="mt-8 font-serif text-lg font-bold">Notifications récentes</h2>
+<div class="mt-3 space-y-2">
+  @for (n of notificationsRecentes(); track n.id) {
+    <button
+      type="button"
+      (click)="marquerLue(n)"
+      class="block w-full rounded-lg border px-4 py-3 text-left text-sm"
+      [class]="stylesNotification[n.type].classes"
+      [class.font-semibold]="!n.lue"
+    >
+      {{ stylesNotification[n.type].icone }} {{ n.message }}
+      <span class="mt-1 block text-xs font-normal opacity-70">
+        {{ n.dateCreation | date: 'd MMM y, HH:mm' }}{{ n.lue ? '' : ' · non lue' }}
+      </span>
+    </button>
+  } @empty {
+    <p class="rounded-lg border border-ligne bg-white px-4 py-3 text-sm text-marine/60">Aucune notification pour le moment.</p>
+  }
+</div>
+
+<!-- Création d'un article : on réutilise la page "Nouvel article", sans son titre -->
+<div class="mt-2">
+  <app-nouvel-article [avecTitre]="false" (enregistre)="chargerArticles()" />
+</div>
+
+<!-- Mes articles -->
+<div class="mt-8">
+  <app-panel titre="Mes articles">
+    @if (erreurAction()) {
+      <p class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreurAction() }}</p>
+    }
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-ligne text-[11px] uppercase tracking-wide text-marine/60">
+            <th class="py-2 pr-4 font-semibold">Titre</th>
+            <th class="py-2 pr-4 font-semibold">Catégorie</th>
+            <th class="py-2 pr-4 font-semibold">Statut</th>
+            <th class="py-2 pr-4 font-semibold">Date</th>
+            <th class="py-2 font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of mesArticles(); track a.id) {
+            <tr class="border-b border-ligne align-top last:border-0">
+              <td class="min-w-48 py-3 pr-4">
+                {{ a.titre }}
+                <!-- Le retour du responsable éditorial, si l'article est à réviser ou refusé -->
+                @if (a.commentaireEditorial && (a.statut === 'A_REVISER' || a.statut === 'REFUSE')) {
+                  <span class="mt-1 block text-xs text-brique">Retour : {{ a.commentaireEditorial }}</span>
+                }
+              </td>
+              <td class="whitespace-nowrap py-3 pr-4">{{ a.categorieNom }}</td>
+              <td class="py-3 pr-4"><app-status-badge [statut]="a.statut" /></td>
+              <td class="whitespace-nowrap py-3 pr-4">{{ (a.datePublication ?? a.dateCreation) | date: 'd MMM y' }}</td>
+              <td class="whitespace-nowrap py-3 text-xs">
+                                 @if (a.statut === 'BROUILLON' || a.statut === 'A_REVISER') {
+                  <button type="button" (click)="soumettre(a)" class="mr-3 font-semibold text-brique hover:underline">Soumettre</button>
+                }
+                @if (a.statut !== 'PUBLIE' && a.statut !== 'ARCHIVE') {
+                  <button type="button" (click)="publier(a)" class="font-semibold text-marine hover:underline">Publier</button>
+                } @else {
+                  <span class="text-marine/40">—</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="py-6 text-center text-sm text-marine/60">Vous n'avez encore écrit aucun article.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </app-panel>
+</div>

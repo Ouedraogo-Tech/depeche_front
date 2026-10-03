@@ -1,0 +1,58 @@
+<a routerLink="/admin/personnel" class="text-xs font-bold uppercase tracking-wide text-marine/60 hover:text-marine">← Retour au personnel</a>
+
+@if (utilisateur() === undefined) {
+  <app-spinner />
+} @else if (utilisateur(); as u) {
+  <!-- En-tête : avatar, nom, rôle, statut + bouton Modifier -->
+  <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+    <app-avatar [prenom]="u.prenom" [nom]="u.nom" [photo]="u.photo" taille="md" />
+    <div class="min-w-0 flex-1">
+      <h1 class="font-serif text-2xl font-bold sm:text-3xl">{{ u.prenom }} {{ u.nom }}</h1>
+      <div class="mt-2 flex flex-wrap items-center gap-2">
+        <span class="rounded-full border border-sable bg-creme px-2.5 py-0.5 text-xs">{{ libellesRoles[u.roles[0]] }}</span>
+        <app-status-badge [statut]="u.actif ? 'ACTIF' : 'DESACTIVE'" />
+      </div>
+    </div>
+    <a
+      [routerLink]="['/admin/personnel', u.id, 'modifier']"
+      class="rounded-md bg-marine px-4 py-2.5 text-center text-xs font-bold uppercase text-white hover:bg-marine-fonce"
+    >
+      Modifier / gérer le compte
+    </a>
+  </div>
+
+  <!-- Informations -->
+  <div class="mt-6">
+    <app-panel titre="Informations">
+      <dl class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2 xl:grid-cols-3">
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Prénom</dt><dd class="mt-1">{{ u.prenom }}</dd></div>
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Nom</dt><dd class="mt-1">{{ u.nom }}</dd></div>
+        <div><dt class="text-xs font-bold uppercase text-marine/60">E-mail</dt><dd class="mt-1 break-all">{{ u.email }}</dd></div>
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Téléphone</dt><dd class="mt-1">{{ u.telephone || '—' }}</dd></div>
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Inscrit le</dt><dd class="mt-1">{{ u.dateInscription ? (u.dateInscription | date: 'd MMMM y') : '—' }}</dd></div>
+        <div><dt class="text-xs font-bold uppercase text-marine/60">Identifiant</dt><dd class="mt-1">#{{ u.id }}</dd></div>
+      </dl>
+    </app-panel>
+  </div>
+
+  <!-- Activité éditoriale (si la personne a écrit des articles) -->
+  @if (sesArticles().length > 0) {
+    <div class="mt-6">
+      <app-panel titre="Activité éditoriale">
+        <p class="mb-4 text-sm">
+          <strong class="text-lg">{{ nbPublies() }}</strong> article(s) publié(s) sur {{ sesArticles().length }} écrit(s).
+        </p>
+        <ul class="divide-y divide-ligne text-sm">
+          @for (a of sesArticles(); track a.id) {
+            <li class="flex items-center justify-between gap-3 py-2.5">
+              <span class="min-w-0 truncate">{{ a.titre }}</span>
+              <app-status-badge [statut]="a.statut" />
+            </li>
+          }
+        </ul>
+      </app-panel>
+    </div>
+  }
+} @else {
+  <p class="mt-10 rounded-xl border border-ligne bg-white px-4 py-8 text-center text-sm text-marine/60">Compte introuvable.</p>
+}

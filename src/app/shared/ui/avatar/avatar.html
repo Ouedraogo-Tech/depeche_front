@@ -1,0 +1,12 @@
+<!-- Cercle rouge brique avec les initiales ; la photo (si elle existe) se pose PAR-DESSUS -->
+<span
+  class="relative flex items-center justify-center overflow-hidden rounded-full bg-brique font-bold text-white"
+  [class]="classesTaille()"
+>
+  {{ initiales() }}
+  @if (photo(); as url) {
+    @if (!imageCassee()) {
+      <img [src]="url" alt="" (error)="imageCassee.set(true)" class="absolute inset-0 h-full w-full object-cover" />
+    }
+  }
+</span>

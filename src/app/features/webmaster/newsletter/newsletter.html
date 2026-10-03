@@ -1,0 +1,175 @@
+<!-- En-tête + boutons d'export : empilés sur téléphone -->
+<div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+  <div>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Newsletter</h1>
+    <p class="mt-1 text-sm text-marine/70">Les lecteurs abonnés aux actualités de Dépêche 226</p>
+  </div>
+  <div class="flex flex-col gap-2 sm:flex-row">
+    <button type="button" (click)="copierEmails()" [disabled]="actifs().length === 0" class="rounded-md border border-marine px-4 py-2.5 text-xs font-bold uppercase text-marine hover:bg-creme disabled:opacity-40">
+      Copier les e-mails
+    </button>
+    <button type="button" (click)="exporterCsv()" [disabled]="actifs().length === 0" class="rounded-md bg-brique px-4 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 disabled:opacity-40">
+      ⬇ Exporter en CSV ({{ actifs().length }})
+    </button>
+  </div>
+</div>
+
+<!-- ===== Composer et envoyer la newsletter ===== -->
+<div class="mt-6">
+  <app-panel titre="Envoyer la newsletter">
+    <!-- Objet de l'e-mail -->
+    <label for="objet" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Objet de l'e-mail</label>
+    <input
+      id="objet"
+      maxlength="150"
+      [value]="objet()"
+      (input)="objet.set($any($event.target).value)"
+      class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+    />
+
+    <!-- Articles à envoyer : les 5 plus récents sont cochés d'office -->
+    <p class="mb-2 mt-5 text-xs font-bold uppercase tracking-wide text-marine/70">
+      Articles à envoyer ({{ articlesChoisis().size }}/{{ maxArticles }})
+    </p>
+    @if (articlesPublies() === undefined) {
+      <app-spinner />
+    } @else {
+      <ul class="grid grid-cols-1 gap-2 md:grid-cols-2">
+        @for (a of articlesPublies(); track a.id) {
+          <li>
+            <label
+              class="flex cursor-pointer items-start gap-3 rounded-md border px-3 py-2.5 text-sm"
+              [class]="articlesChoisis().has(a.id) ? 'border-marine bg-creme' : 'border-ligne bg-white hover:bg-creme/50'"
+            >
+              <input type="checkbox" [checked]="articlesChoisis().has(a.id)" (change)="basculerArticle(a.id)" class="mt-0.5 h-4 w-4 shrink-0 accent-brique" />
+              <span class="min-w-0">
+                <span class="block font-semibold leading-snug">{{ a.titre }}</span>
+                <span class="text-xs text-marine/60">{{ a.categorieNom }} · {{ a.datePublication | date: 'd MMM y' }}</span>
+              </span>
+            </label>
+          </li>
+        } @empty {
+          <li class="text-sm text-marine/60">Aucun article publié pour le moment.</li>
+        }
+      </ul>
+    }
+
+    <!-- Résumé + bouton d'envoi : empilés sur téléphone -->
+    <div class="mt-5 flex flex-col gap-3 rounded-md bg-creme px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <p class="text-sm">
+        <strong>{{ articlesChoisis().size }}</strong> article(s) →
+        <strong>{{ nbAbonnesChoisis() }}</strong> abonné(s)
+        <span class="block text-xs text-marine/60">Cochez les abonnés dans la liste ci-dessous (onglet « Actifs »).</span>
+      </p>
+      <button
+        type="button"
+        (click)="confirmerEnvoi.set(true)"
+        [disabled]="!peutEnvoyer()"
+        class="rounded-md bg-brique px-5 py-3 text-xs font-bold uppercase text-white hover:opacity-90 disabled:opacity-40"
+      >
+        {{ envoiEnCours() ? 'Envoi en cours…' : '✉ Envoyer la newsletter' }}
+      </button>
+    </div>
+  </app-panel>
+</div>
+
+<!-- Onglets + recherche -->
+<div class="mt-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+  <div class="flex flex-wrap gap-2">
+    @for (o of onglets; track o.valeur) {
+      <button
+        type="button"
+        (click)="onglet.set(o.valeur)"
+        class="whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold"
+        [class]="onglet() === o.valeur ? 'border-marine bg-marine text-white' : 'border-ligne bg-white text-marine hover:bg-creme'"
+      >
+        {{ o.libelle }} <span class="opacity-70">({{ compteurs()[o.valeur] }})</span>
+      </button>
+    }
+  </div>
+  <input
+    type="search"
+    placeholder="Rechercher un e-mail…"
+    [value]="recherche()"
+    (input)="recherche.set($any($event.target).value)"
+    class="w-full rounded-md border border-ligne bg-white px-3 py-2 text-sm focus:border-marine focus:outline-none md:w-72"
+  />
+</div>
+
+@if (erreur()) {
+  <p class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+}
+
+@if (abonnes() === undefined) {
+  <app-spinner />
+} @else {
+  <!-- Case "Tout cocher" : destinataires de la newsletter (abonnés actifs) -->
+  @if (actifs().length > 0) {
+    <label class="mt-4 flex cursor-pointer items-center gap-2 px-1 text-sm font-semibold">
+      <input type="checkbox" [checked]="tousCoches()" (change)="basculerTous()" class="h-4 w-4 accent-brique" />
+      Tout cocher ({{ nbAbonnesChoisis() }}/{{ actifs().length }} abonnés actifs)
+    </label>
+  }
+
+  <!-- Une ligne par abonné : empilée sur téléphone, sur une ligne à partir de sm -->
+  <ul class="mt-2 divide-y divide-ligne rounded-xl border border-ligne bg-white">
+    @for (a of lignes(); track a.id) {
+      <li class="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
+        <!-- Case : recevoir la newsletter (seulement pour les actifs) -->
+        <span class="flex min-w-0 flex-1 items-center gap-3">
+          @if (a.actif) {
+            <input
+              type="checkbox"
+              [checked]="abonnesChoisis().has(a.id)"
+              (change)="basculerAbonne(a.id)"
+              [attr.aria-label]="'Envoyer la newsletter à ' + a.email"
+              class="h-4 w-4 shrink-0 accent-brique"
+            />
+          }
+          <span class="min-w-0 break-all font-semibold" [class.text-marine/50]="!a.actif">{{ a.email }}</span>
+        </span>
+        <span class="text-xs text-marine/60">depuis le {{ a.dateAbonnement | date: 'd MMM y' }}</span>
+        <div class="flex items-center gap-3">
+          <app-status-badge [statut]="a.actif ? 'ACTIF' : 'DESACTIVE'" />
+          @if (a.actif) {
+            <button type="button" (click)="aDesabonner.set(a)" [disabled]="enCours() === a.id" class="text-xs font-bold uppercase text-brique hover:underline disabled:opacity-50">
+              Désabonner
+            </button>
+          } @else {
+            <button type="button" (click)="reabonner(a)" [disabled]="enCours() === a.id" class="text-xs font-bold uppercase text-green-800 hover:underline disabled:opacity-50">
+              Réabonner
+            </button>
+          }
+        </div>
+      </li>
+    } @empty {
+      <li class="p-3">
+        <app-empty-state
+          [icone]="abonnes()!.length === 0 ? '✉️' : '🔍'"
+          [message]="abonnes()!.length === 0 ? 'Aucun abonné pour le moment.' : 'Aucun abonné ne correspond.'"
+        />
+      </li>
+    }
+  </ul>
+}
+
+<!-- Confirmation avant l'envoi : rappel de ce qui va partir -->
+@if (confirmerEnvoi()) {
+  <app-confirm-dialog
+    titre="Envoyer la newsletter ?"
+    [message]="'« ' + objet() + ' » : ' + titresChoisis().length + ' article(s) (' + titresChoisis().join(' · ') + ') vont être envoyés à ' + nbAbonnesChoisis() + ' abonné(s).'"
+    libelleConfirmer="Envoyer"
+    (confirme)="envoyer()"
+    (annule)="confirmerEnvoi.set(false)"
+  />
+}
+
+@if (aDesabonner(); as a) {
+  <app-confirm-dialog
+    titre="Désabonner cette adresse ?"
+    [message]="a.email + ' ne recevra plus la newsletter. Vous pourrez la réabonner plus tard.'"
+    libelleConfirmer="Désabonner"
+    (confirme)="desabonner()"
+    (annule)="aDesabonner.set(null)"
+  />
+}

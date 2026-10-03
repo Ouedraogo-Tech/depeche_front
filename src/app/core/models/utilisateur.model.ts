@@ -16,6 +16,7 @@ export interface Utilisateur {
   prenom: string;
   email: string;
   telephone: string | null;
+    photo: string | null; // photo de profil (null = pas de photo → initiales)
   roles: RoleName[];
   actif: boolean;
   dateInscription: string | null;
@@ -37,4 +38,13 @@ export interface UtilisateurModification {
   prenom: string;
   telephone?: string;
   motDePasse?: string;
+    photo?: string; // absente = inchangée, "" = retirée, "/uploads/..." = nouvelle photo
 }
+// Texte affiché pour chaque rôle (tableaux, fiches, listes déroulantes)
+export const LIBELLES_ROLES: Record<RoleName, string> = {
+  ADMIN: 'Administrateur',
+  JOURNALISTE: 'Journaliste',
+  RESPONSABLE_EDITORIAL: 'Resp. éditorial',
+  WEBMASTER: 'Webmaster',
+  LECTEUR: 'Lecteur',
+};

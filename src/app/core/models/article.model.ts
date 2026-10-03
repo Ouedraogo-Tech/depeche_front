@@ -15,6 +15,7 @@ export interface Article {
   resume: string | null;
   contenu: string;
   image: string | null;
+  lienVideo: string | null; // lien YouTube (facultatif)
   statut: StatutArticle;
   commentaireEditorial: string | null;
   dateCreation: string;
@@ -31,6 +32,7 @@ export interface ArticleRequest {
   resume?: string;
   contenu: string;
   image?: string;
+  lienVideo?: string; // "" = retirer la vidéo
   categorieId: number;
 }
 

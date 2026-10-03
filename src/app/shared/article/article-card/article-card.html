@@ -1,0 +1,29 @@
+<article class="flex h-full flex-col overflow-hidden rounded-xl border border-ligne bg-white">
+  <!-- Image (ou emplacement sable si l'article n'a pas d'image) -->
+  <a [routerLink]="['/articles', article().id]" class="relative block aspect-[16/9] bg-sable">
+    @if (article().image; as image) {
+      <img [src]="image" [alt]="article().titre" loading="lazy" class="h-full w-full object-cover" />
+    }
+    <!-- Badge : l'article est accompagné d'une vidéo YouTube -->
+    @if (article().lienVideo) {
+      <span class="absolute bottom-2 left-2 rounded bg-brique px-2 py-1 text-[11px] font-bold uppercase text-white shadow">▶ Vidéo</span>
+    }
+  </a>
+
+  <div class="flex flex-1 flex-col p-4">
+    <p class="text-[11px] font-bold uppercase tracking-wide text-brique">
+      {{ article().categorieNom }} · {{ article().datePublication | date: 'd MMM' | uppercase }}
+    </p>
+    <h3 class="mt-1 font-semibold leading-snug">
+      <a [routerLink]="['/articles', article().id]" class="hover:underline">{{ article().titre }}</a>
+    </h3>
+    <!-- Le résumé, ou à défaut le début du contenu -->
+    <p class="mt-1 text-sm text-marine/70">
+      {{ article().resume || (article().contenu | slice: 0 : 110) + '…' }}
+    </p>
+    <!-- mt-auto : le lien reste en bas de la carte, même si les textes n'ont pas la même longueur -->
+    <a [routerLink]="['/articles', article().id]" class="mt-auto pt-3 text-xs font-bold uppercase text-brique">
+      Lire plus →
+    </a>
+  </div>
+</article>

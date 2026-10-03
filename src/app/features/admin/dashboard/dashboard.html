@@ -1,0 +1,118 @@
+<!-- En-tête -->
+<h1 class="font-serif text-2xl font-bold sm:text-3xl">Dashboard administrateur</h1>
+<p class="mt-1 text-sm text-marine/70">Gestion du personnel, des rôles et vue d'ensemble de la plateforme</p>
+
+<!-- Les 4 cartes chiffrées : affichées quand les chiffres sont arrivés du backend -->
+@if (statistiques(); as s) {
+    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <app-stat-card [valeur]="s.totalUtilisateurs" libelle="Utilisateurs" />
+    <app-stat-card [valeur]="s.utilisateursActifs" libelle="Comptes actifs" />
+    <app-stat-card [valeur]="s.totalRoles" libelle="Rôles & compétences" />
+    <app-stat-card [valeur]="s.utilisateursDesactives" libelle="Comptes désactivés" />
+  </div>
+}
+
+<!-- Blocs empilés, 3 colonnes à partir d'un écran large -->
+<div class="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+
+  <!-- Gestion du personnel (2 colonnes sur écran large) -->
+  <app-panel titre="Gestion du personnel" class="min-w-0 xl:col-span-2">
+    <!-- Lien vers la page "Créer un compte" -->
+    <a
+      actions
+      routerLink="/admin/personnel/nouveau"
+      class="whitespace-nowrap rounded-md bg-brique px-4 py-2 text-xs font-bold uppercase text-white hover:opacity-90"
+    >
+      + Créer un compte
+    </a>
+
+    <!-- Si le tableau est trop large, il défile DANS la carte au lieu de déborder -->
+    @if (erreurAction()) {
+      <p class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreurAction() }}</p>
+    }
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="border-b border-ligne text-[11px] uppercase tracking-wide text-marine/60">
+            <th class="py-2 pr-4 font-semibold">Nom</th>
+            <th class="py-2 pr-4 font-semibold">E-mail</th>
+            <th class="py-2 pr-4 font-semibold">Rôle</th>
+            <th class="py-2 pr-4 font-semibold">Statut</th>
+            <th class="py-2 font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of utilisateurs(); track u.id) {
+            <tr class="border-b border-ligne last:border-0">
+              <td class="whitespace-nowrap py-3 pr-4">{{ u.prenom }} {{ u.nom }}</td>
+              <td class="py-3 pr-4">{{ u.email }}</td>
+              <td class="py-3 pr-4">
+                <span class="whitespace-nowrap rounded-full border border-sable bg-creme px-2.5 py-0.5 text-xs">
+                  {{ libellesRoles[u.roles[0]] }}
+                </span>
+              </td>
+              <td class="py-3 pr-4">
+                <app-status-badge [statut]="u.actif ? 'ACTIF' : 'DESACTIVE'" />
+              </td>
+                            <!-- Voir (fiche) · Modifier · Désactiver/Réactiver -->
+              <td class="whitespace-nowrap py-3 text-xs">
+                <a [routerLink]="['/admin/personnel', u.id]" class="mr-3 font-semibold text-marine hover:underline">Voir</a>
+                <a [routerLink]="['/admin/personnel', u.id, 'modifier']" class="mr-3 font-semibold text-marine hover:underline">Modifier</a>
+                <button type="button" (click)="aConfirmer.set(u)" class="font-semibold text-brique hover:underline">
+                  {{ u.actif ? 'Désactiver' : 'Réactiver' }}
+                </button>
+              </td>
+
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="py-6 text-center text-sm text-marine/60">Aucun utilisateur à afficher.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </app-panel>
+
+  <!-- Colonne de droite -->
+  <div class="min-w-0 space-y-6">
+    <app-panel titre="Rôles & compétences">
+      <ul class="space-y-2 text-sm">
+        @for (role of roles(); track role.id) {
+          <li>{{ role.nom }}</li>
+        }
+      </ul>
+    </app-panel>
+
+    <app-panel titre="Consulter les articles">
+            <!-- Petite carte à droite du titre : nombre d'articles publiés (vient des statistiques) -->
+      <span actions class="whitespace-nowrap rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">
+        {{ statistiques()?.articlesParStatut?.PUBLIE ?? 0 }} publiés
+      </span>
+      <ul class="divide-y divide-ligne text-sm">
+        @for (article of articlesRecents(); track article.id) {
+          <li class="flex items-center justify-between gap-3 py-2.5">
+            <span>{{ article.titre }}</span>
+            <app-status-badge [statut]="article.statut" />
+          </li>
+        } @empty {
+          <li class="py-2.5 text-sm text-marine/60">Aucun article pour le moment.</li>
+        }
+      </ul>
+            <a routerLink="/admin/articles" class="mt-3 block text-center text-xs font-bold uppercase text-brique hover:underline">+ Voir tous les articles</a>
+    </app-panel>
+  </div>
+
+</div>
+
+<!-- Fenêtre de confirmation (affichée seulement quand un compte est sélectionné) -->
+@if (aConfirmer(); as compte) {
+  <app-confirm-dialog
+    [titre]="compte.actif ? 'Désactiver ce compte ?' : 'Réactiver ce compte ?'"
+    [message]="compte.prenom + ' ' + compte.nom + (compte.actif ? ' ne pourra plus se connecter.' : ' pourra de nouveau se connecter.')"
+    [libelleConfirmer]="compte.actif ? 'Désactiver' : 'Réactiver'"
+    (confirme)="confirmerChangementStatut()"
+    (annule)="aConfirmer.set(null)"
+  />
+}

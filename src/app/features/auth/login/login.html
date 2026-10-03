@@ -1,0 +1,70 @@
+<!-- Page seule : la carte de connexion centrée sur l'écran (sans le cadre du site) -->
+<div class="flex min-h-screen flex-col items-center justify-center px-4 py-10">
+  <!-- Logo : ramène au site -->
+  <a routerLink="/" class="mb-6 flex items-center gap-3">
+    <span class="h-7 w-1 bg-brique"></span>
+    <span class="font-serif text-2xl font-bold text-marine sm:text-3xl">DÉPÊCHE 226</span>
+  </a>
+
+  <div class="w-full max-w-md rounded-xl border border-ligne bg-white p-6 shadow-sm sm:p-8">
+    <h1 class="font-serif text-3xl font-bold">Connexion</h1>
+    <p class="mt-1 text-sm text-marine/70">Lecteurs et équipe de Dépêche 226</p>
+
+    <form class="mt-6 space-y-4" [formGroup]="formulaire" (ngSubmit)="seConnecter()">
+
+      <!-- E-mail -->
+      <div>
+        <label for="email" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">E-mail</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+        />
+        @if (formulaire.controls.email.touched && formulaire.controls.email.invalid) {
+          <p class="mt-1 text-xs text-brique">Saisissez une adresse e-mail valide.</p>
+        }
+      </div>
+
+      <!-- Mot de passe -->
+      <div>
+        <label for="motDePasse" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Mot de passe</label>
+        <input
+          id="motDePasse"
+          type="password"
+          formControlName="motDePasse"
+          autocomplete="current-password"
+          class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+        />
+        @if (formulaire.controls.motDePasse.touched && formulaire.controls.motDePasse.invalid) {
+          <p class="mt-1 text-xs text-brique">Le mot de passe est obligatoire.</p>
+        }
+      </div>
+
+      <!-- Message d'erreur du backend -->
+      @if (erreur()) {
+        <p class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="chargement()"
+        class="w-full rounded-md bg-marine py-3 text-sm font-bold uppercase text-white hover:bg-marine-fonce disabled:opacity-60"
+      >
+        {{ chargement() ? 'Connexion…' : 'Se connecter' }}
+      </button>
+    </form>
+
+    <!-- Lien vers l'inscription : on garde ?retour= pour revenir à l'article après -->
+    <p class="mt-6 text-center text-sm text-marine/70">
+      Pas encore de compte ?
+      <a routerLink="/inscription" [queryParams]="{ retour: retour() }" class="font-semibold text-brique hover:underline">
+        Créer un compte lecteur
+      </a>
+    </p>
+  </div>
+
+  <!-- Retour discret au site public -->
+  <a routerLink="/" class="mt-6 text-xs font-bold uppercase tracking-wide text-marine/60 hover:text-marine">← Retour au site</a>
+</div>

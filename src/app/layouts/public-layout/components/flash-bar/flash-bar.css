@@ -1,0 +1,77 @@
+/* Un titre traverse le bandeau : il part juste à DROITE de la zone et finit juste à GAUCHE (entièrement sorti) */
+.titre {
+  animation-timing-function: linear;
+  animation-iteration-count: 1; /* une seule traversée, puis "animationend" → titre suivant */
+  animation-fill-mode: both;
+}
+
+/* Deux animations identiques, avec deux noms : on alterne à chaque titre pour que la traversée recommence */
+.titre.pair {
+  animation-name: traverser-a;
+}
+.titre.impair {
+  animation-name: traverser-b;
+}
+
+@keyframes traverser-a {
+  from {
+    left: 100%; /* bord gauche du titre = bord droit de la zone → invisible à droite */
+    transform: translateX(0);
+  }
+  to {
+    left: 0; /* bord gauche du titre = bord gauche de la zone… */
+    transform: translateX(-100%); /* …puis décalé de toute sa largeur → invisible à gauche */
+  }
+}
+
+@keyframes traverser-b {
+  from {
+    left: 100%;
+    transform: translateX(0);
+  }
+  to {
+    left: 0;
+    transform: translateX(-100%);
+  }
+}
+
+/* Pause au survol (souris) ou au clavier : on peut lire et cliquer tranquillement */
+.bandeau:hover .titre,
+.bandeau:focus-within .titre {
+  animation-play-state: paused;
+}
+
+/* Personnes sensibles aux animations : le titre ne bouge pas, il reste 6 s puis laisse place au suivant */
+@media (prefers-reduced-motion: reduce) {
+  .titre {
+    position: static;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation-duration: 6s !important;
+  }
+  .titre.pair {
+    animation-name: rester-a;
+  }
+  .titre.impair {
+    animation-name: rester-b;
+  }
+}
+
+@keyframes rester-a {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rester-b {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}

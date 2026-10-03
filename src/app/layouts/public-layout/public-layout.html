@@ -1,14 +1,61 @@
 <div class="flex min-h-screen flex-col">
-   <app-header />
-   <app-flash-bar />
+  <app-header />
+  <app-flash-bar />
 
-
-  <!-- La page demandée s'affiche ici -->
-  <main class="flex-1 px-10 py-10">
+  <!-- La page demandée s'affiche ici (marges plus petites sur téléphone) -->
+  <main class="flex-1 px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
     <router-outlet />
-    <p class="font-serif text-3xl font-bold">Contenu de la page</p>
   </main>
 
-  <!-- Emplacement du footer (remplacé au composant 4) -->
-  <div class="bg-marine-fonce px-10 py-10 text-white">FOOTER</div>
+
+
+  <!-- ===== Carte newsletter (juste au-dessus du footer) ===== -->
+  <section id="newsletter" class="bg-creme px-4 py-10 sm:px-6 lg:px-10">
+    <div class="mx-auto max-w-7xl border-t-8 border-brique bg-marine-fonce px-6 py-10 sm:px-10 lg:px-16 lg:py-14">
+      <!-- Téléphone : texte puis formulaire · à partir de md : côte à côte -->
+      <div class="grid grid-cols-1 items-center gap-8 md:grid-cols-2 md:gap-12">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.25em] text-orange-300">Newsletter</p>
+          <h2 class="mt-4 font-serif text-3xl font-bold leading-tight text-creme sm:text-4xl lg:text-5xl">
+            Recevez l'essentiel de l'actualité
+          </h2>
+          <p class="mt-4 leading-relaxed text-white/80 sm:text-lg">
+            Les articles du Burkina Faso et du Sahel sélectionnés par notre rédaction, directement dans votre boîte mail.
+          </p>
+        </div>
+
+        <form [formGroup]="formulaireNewsletter" (ngSubmit)="abonner()">
+          <!-- Champ + bouton : empilés sur téléphone, collés à partir de sm -->
+          <div class="flex flex-col sm:flex-row">
+            <label for="email-newsletter" class="sr-only">Adresse e-mail</label>
+            <input
+              id="email-newsletter"
+              type="email"
+              formControlName="email"
+              placeholder="votre@email.bf"
+              autocomplete="email"
+              class="min-w-0 flex-1 bg-creme px-5 py-4 text-marine placeholder:text-marine/50 focus:outline-none focus:ring-2 focus:ring-orange-300"
+            />
+            <button
+              type="submit"
+              [disabled]="envoiEnCours()"
+              class="bg-brique px-8 py-4 text-sm font-bold uppercase tracking-wider text-white hover:opacity-90 disabled:opacity-60"
+            >
+              {{ envoiEnCours() ? 'Envoi…' : "S'abonner" }}
+            </button>
+          </div>
+
+          @if (messageNewsletter(); as m) {
+            <p class="mt-3 text-sm font-semibold" [class]="m.succes ? 'text-green-300' : 'text-red-300'">
+              {{ m.succes ? '✓ ' : '' }}{{ m.texte }}
+            </p>
+          }
+          <p class="mt-3 text-sm text-white/60">
+            Désabonnement en un clic depuis chaque e-mail. Nous ne partageons jamais votre adresse.
+          </p>
+        </form>
+      </div>
+    </div>
+  </section>
+   <app-footer />
 </div>

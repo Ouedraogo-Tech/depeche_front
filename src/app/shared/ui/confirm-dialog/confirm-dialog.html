@@ -1,0 +1,24 @@
+<!-- Fond sombre sur toute la page : un clic dessus = Annuler -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-marine/50 p-4" (click)="annule.emit()">
+
+  <!-- La fenêtre : un clic dedans ne doit PAS fermer -->
+  <div
+    class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+    role="dialog"
+    aria-modal="true"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 class="font-serif text-xl font-bold">{{ titre() }}</h2>
+    <p class="mt-2 text-sm text-marine/80">{{ message() }}</p>
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button type="button" (click)="annule.emit()" class="rounded-md border border-marine px-4 py-2 text-xs font-bold uppercase text-marine">
+        Annuler
+      </button>
+      <button type="button" (click)="confirme.emit()" class="rounded-md bg-brique px-4 py-2 text-xs font-bold uppercase text-white hover:opacity-90">
+        {{ libelleConfirmer() }}
+      </button>
+    </div>
+  </div>
+
+</div>

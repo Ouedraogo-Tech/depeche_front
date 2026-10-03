@@ -1,0 +1,68 @@
+<footer class="bg-marine-fonce text-white">
+  <!-- 1 colonne sur téléphone, 2 sur tablette, 4 sur ordinateur -->
+  <div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-10 lg:py-12">
+    <!-- Logo + slogan -->
+    <div>
+      <a routerLink="/" class="flex items-center gap-3">
+        <span class="h-6 w-1 bg-brique"></span>
+        <span class="font-serif text-2xl font-bold">{{ parametres().nomSite }}</span>
+      </a>
+      @if (parametres().slogan) {
+        <p class="mt-3 max-w-xs text-sm text-white/70">{{ parametres().slogan }}</p>
+      }
+    </div>
+
+    <!-- Navigation -->
+    <div>
+      <h3 class="mb-4 text-sm font-bold uppercase tracking-wide">Navigation</h3>
+      <ul class="space-y-2 text-sm text-white/70">
+        <li><a routerLink="/" class="hover:text-white">Accueil</a></li>
+         <li><a routerLink="/a-propos" class="hover:text-white">À propos</a></li>
+        <li><button type="button" (click)="allerANewsletter()" class="hover:text-white">Newsletter</button></li>
+        <li><a routerLink="/connexion" class="hover:text-white">Espace rédaction</a></li>
+      </ul>
+    </div>
+
+    <!-- Rubriques (= catégories) : le filtre sera branché à l'étape 2 -->
+    <div>
+      <h3 class="mb-4 text-sm font-bold uppercase tracking-wide">Rubriques</h3>
+      <ul class="space-y-2 text-sm text-white/70">
+        @for (rubrique of rubriques(); track rubrique.id) {
+          <li>
+            <a routerLink="/" [queryParams]="{ rubrique: rubrique.id }" class="hover:text-white">{{ rubrique.nom }}</a>
+          </li>
+        } @empty {
+          <li class="text-white/40">—</li>
+        }
+      </ul>
+    </div>
+
+    <!-- Contact : chaque ligne s'affiche seulement si elle est renseignée -->
+    <div>
+      <h3 class="mb-4 text-sm font-bold uppercase tracking-wide">Contact</h3>
+      <ul class="space-y-2 break-words text-sm text-white/70">
+        @if (parametres().emailContact; as email) {
+          <li><a [href]="'mailto:' + email" class="hover:text-white">✉ {{ email }}</a></li>
+        }
+        @if (parametres().telephone; as tel) {
+          <li><a [href]="'tel:' + tel" class="hover:text-white">☎ {{ tel }}</a></li>
+        }
+        @if (parametres().adresse || parametres().ville) {
+          <li>
+            📍 {{ parametres().adresse }}{{ parametres().adresse && parametres().ville ? ', ' : '' }}{{ parametres().ville }}
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+
+  <!-- Ligne du bas : empilée sur téléphone, côte à côte à partir de md -->
+  <div class="border-t border-white/10">
+    <div class="mx-auto flex max-w-7xl flex-col justify-between gap-2 px-4 py-5 text-xs text-white/50 sm:px-6 md:flex-row lg:px-10">
+      <p>© {{ annee }} {{ parametres().nomSite }} — Tous droits réservés.</p>
+      @if (parametres().mentionEdition) {
+        <p>{{ parametres().mentionEdition }}</p>
+      }
+    </div>
+  </div>
+</footer>

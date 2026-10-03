@@ -1,0 +1,13 @@
+<div
+  class="rounded-xl border border-ligne bg-white px-5 py-4"
+  [class.border-t-4]="accent()"
+  [class.border-t-brique]="accent()"
+>
+  <p class="font-serif text-3xl font-bold text-marine">{{ valeur() | number }}</p>
+  <p class="mt-1 text-xs font-medium uppercase tracking-wide text-marine/70">
+    {{ libelle() }}
+    @if (detail()) {
+      <span class="normal-case"> · {{ detail() }}</span>
+    }
+  </p>
+</div>

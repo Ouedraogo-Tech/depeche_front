@@ -1,0 +1,74 @@
+<h1 class="font-serif text-2xl font-bold sm:text-3xl">Mon profil</h1>
+
+@if (utilisateur() === undefined) {
+  <app-spinner />
+} @else if (utilisateur(); as u) {
+  @if (erreur()) {
+    <p class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+  }
+
+  <!-- Photo de profil : empilé sur téléphone, côte à côte à partir de sm -->
+  <div class="mt-6 flex max-w-3xl flex-col items-center gap-5 rounded-xl border border-ligne bg-white p-6 sm:flex-row sm:items-center">
+    <app-avatar [prenom]="u.prenom" [nom]="u.nom" [photo]="u.photo" taille="lg" />
+
+    <div class="text-center sm:text-left">
+      <p class="font-serif text-xl font-bold">{{ u.prenom }} {{ u.nom }}</p>
+      <p class="text-sm text-marine/70">
+        {{ u.email }} · {{ libellesRoles[u.roles[0]] }}
+        @if (u.dateInscription) { · membre depuis le {{ u.dateInscription | date: 'd MMMM y' }} }
+      </p>
+
+      <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+        <!-- Le <label> ouvre le sélecteur de fichier (ordinateur) ou galerie / appareil photo (téléphone) -->
+        <label
+          class="cursor-pointer rounded-md bg-marine px-4 py-2 text-center text-xs font-bold uppercase text-white hover:bg-marine-fonce"
+          [class.opacity-60]="photoEnCours()"
+        >
+          {{ photoEnCours() ? 'Envoi…' : (u.photo ? 'Changer la photo' : 'Ajouter une photo') }}
+          <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" [disabled]="photoEnCours()" (change)="changerPhoto($event)" />
+        </label>
+        @if (u.photo) {
+          <button type="button" (click)="retirerPhoto()" [disabled]="photoEnCours()" class="rounded-md border border-brique px-4 py-2 text-xs font-bold uppercase text-brique hover:bg-red-50">
+            Retirer
+          </button>
+        }
+      </div>
+      <p class="mt-2 text-xs text-marine/50">JPG, PNG ou WEBP · 5 Mo maximum</p>
+    </div>
+  </div>
+
+  <!-- Informations -->
+  <div class="mt-6 max-w-3xl">
+    <app-panel titre="Mes informations">
+      <form [formGroup]="formulaire" (ngSubmit)="enregistrer()" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label for="prenom" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Prénom</label>
+          <input id="prenom" formControlName="prenom" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+          @if (aUneErreur('prenom')) { <p class="mt-1 text-xs text-brique">Le prénom est obligatoire.</p> }
+        </div>
+        <div>
+          <label for="nom" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Nom</label>
+          <input id="nom" formControlName="nom" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+          @if (aUneErreur('nom')) { <p class="mt-1 text-xs text-brique">Le nom est obligatoire.</p> }
+        </div>
+        <div>
+          <label for="telephone" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Téléphone</label>
+          <input id="telephone" formControlName="telephone" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+        </div>
+        <div>
+          <label for="motDePasse" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Nouveau mot de passe (facultatif)</label>
+          <input id="motDePasse" type="password" formControlName="motDePasse" autocomplete="new-password" placeholder="Laisser vide pour ne pas changer" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
+          @if (aUneErreur('motDePasse')) { <p class="mt-1 text-xs text-brique">6 caractères minimum.</p> }
+        </div>
+
+        <div class="md:col-span-2 md:text-right">
+          <button type="submit" [disabled]="enCours()" class="w-full rounded-md bg-brique px-5 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 disabled:opacity-60 md:w-auto">
+            {{ enCours() ? 'Enregistrement…' : 'Enregistrer' }}
+          </button>
+        </div>
+      </form>
+    </app-panel>
+  </div>
+} @else {
+  <p class="mt-10 rounded-xl border border-ligne bg-white p-6 text-center text-sm text-marine/60">Impossible de charger votre profil.</p>
+}

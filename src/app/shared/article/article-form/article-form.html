@@ -1,0 +1,145 @@
+<form [formGroup]="formulaire" class="space-y-5">
+
+  <!-- Titre (90 caractères maximum, comme la maquette) -->
+  <div>
+    <div class="mb-1 flex items-baseline justify-between">
+      <label for="titre" class="text-xs font-bold uppercase tracking-wide text-marine/70">Titre</label>
+      <span class="text-xs text-marine/50">{{ formulaire.controls.titre.value.length }}/90</span>
+    </div>
+    <input
+      id="titre"
+      formControlName="titre"
+      placeholder="Titre de l'article — 90 caractères maximum"
+      class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+    />
+    @if (aUneErreur('titre')) {
+      <p class="mt-1 text-xs text-brique">Le titre est obligatoire (90 caractères maximum).</p>
+    }
+  </div>
+
+  <!-- Résumé (chapeau affiché sur la page d'accueil) -->
+  <div>
+    <label for="resume" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Résumé</label>
+    <input
+      id="resume"
+      formControlName="resume"
+      placeholder="Chapeau affiché sur la page d'accueil"
+      class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+    />
+    @if (aUneErreur('resume')) {
+      <p class="mt-1 text-xs text-brique">300 caractères maximum.</p>
+    }
+  </div>
+
+  <!-- Contenu -->
+  <div>
+    <label for="contenu" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Contenu</label>
+    <textarea
+      id="contenu"
+      formControlName="contenu"
+      rows="10"
+      placeholder="Rédigez le corps de l'article..."
+      class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+    ></textarea>
+    @if (aUneErreur('contenu')) {
+      <p class="mt-1 text-xs text-brique">Le contenu est obligatoire.</p>
+    }
+  </div>
+
+  <!-- Catégorie -->
+  <div class="md:w-1/2">
+    <label for="categorie" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Catégorie</label>
+    <select
+      id="categorie"
+      formControlName="categorieId"
+      class="w-full rounded-md border border-ligne bg-white px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+    >
+      <option [ngValue]="null" disabled>Choisir une catégorie</option>
+      @for (categorie of categories(); track categorie.id) {
+        <option [ngValue]="categorie.id">{{ categorie.nom }}</option>
+      }
+    </select>
+    @if (aUneErreur('categorieId')) {
+      <p class="mt-1 text-xs text-brique">Choisissez une catégorie.</p>
+    }
+  </div>
+
+  <!-- Image principale : envoyée tout de suite au backend, on garde son adresse -->
+  <div>
+    <span class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Image principale (facultatif)</span>
+    <app-image-upload
+      [url]="formulaire.controls.image.value || null"
+      (urlChange)="formulaire.controls.image.setValue($event ?? '')"
+    />
+  </div>
+
+  <!-- Vidéo YouTube (facultatif) : la vidéo reste sur YouTube, le lecteur y sera redirigé -->
+  <div>
+    <label for="lienVideo" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Vidéo YouTube (facultatif)</label>
+    <input
+      id="lienVideo"
+      type="url"
+      formControlName="lienVideo"
+      placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…"
+      class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+    />
+    @if (aUneErreur('lienVideo')) {
+      <p class="mt-1 text-xs text-brique">Collez un lien YouTube valide (youtube.com/watch?v=…, youtu.be/… ou youtube.com/shorts/…).</p>
+    } @else {
+      <p class="mt-1 text-xs text-marine/50">Publiez d'abord la vidéo sur YouTube, puis collez ici son lien.</p>
+    }
+
+    <!-- Aperçu : la miniature de la vidéo, pour vérifier que c'est la bonne -->
+    @if (miniatureVideo(); as miniature) {
+      <div class="mt-3 flex items-center gap-3 rounded-md border border-ligne bg-creme p-2">
+        <img [src]="miniature" alt="" class="aspect-video w-32 shrink-0 rounded object-cover" />
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+          <span class="text-xs font-semibold text-green-800">✓ Vidéo reconnue</span>
+          <button type="button" (click)="formulaire.controls.lienVideo.setValue('')" class="self-start text-xs font-bold uppercase text-brique hover:underline">
+            Retirer la vidéo
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Erreur du backend -->
+  @if (erreur()) {
+    <p class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+  }
+
+    <!-- Boutons : empilés sur téléphone, côte à côte à partir de sm -->
+  <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+    <button
+      type="button"
+      (click)="envoyer('brouillon')"
+      [disabled]="enCours()"
+      class="rounded-md border border-marine px-5 py-3 text-xs font-bold uppercase text-marine disabled:opacity-60"
+    >
+      {{ modeModification() ? 'Enregistrer les modifications' : 'Enregistrer comme brouillon' }}
+    </button>
+
+    @if (boutonSoumettre()) {
+      <button
+        type="button"
+        (click)="envoyer('soumission')"
+        [disabled]="enCours()"
+        class="rounded-md bg-brique px-5 py-3 text-xs font-bold uppercase text-white hover:opacity-90 disabled:opacity-60"
+      >
+        {{ modeModification() ? 'Enregistrer et soumettre →' : 'Soumettre pour validation →' }}
+      </button>
+    }
+
+    @if (boutonPublier()) {
+      <button
+        type="button"
+        (click)="envoyer('publication')"
+        [disabled]="enCours()"
+        class="rounded-md bg-marine px-5 py-3 text-xs font-bold uppercase text-white hover:bg-marine-fonce disabled:opacity-60"
+      >
+        {{ enCours() ? 'Envoi…' : (modeModification() ? 'Enregistrer et publier' : "Publier l'article") }}
+      </button>
+    }
+  </div>
+
+</form>

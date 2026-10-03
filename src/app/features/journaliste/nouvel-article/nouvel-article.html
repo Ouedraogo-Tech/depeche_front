@@ -1,0 +1,27 @@
+<!-- Titre de la page : caché quand ce composant est affiché dans le dashboard -->
+@if (avecTitre()) {
+  <h1 class="font-serif text-2xl font-bold sm:text-3xl">{{ boutonSoumettre() ? 'Nouvel article' : 'Rédiger un article' }}</h1>
+  <p class="mt-1 text-sm text-marine/70">
+    @if (boutonSoumettre()) {
+      Rédigez votre article, puis enregistrez-le en brouillon, soumettez-le au responsable éditorial ou publiez-le directement.
+    } @else {
+      Rédigez votre article, puis enregistrez-le en brouillon ou publiez-le directement sur le site.
+    }
+  </p>
+}
+
+<!-- Message de succès -->
+
+<div class="mt-6">
+  <app-panel titre="Création d'un article">
+    <app-article-form
+      [categories]="categories()"
+      [enCours]="enCours()"
+      [erreur]="erreur()"
+      [boutonSoumettre]="boutonSoumettre()"
+      (brouillon)="enregistrerBrouillon($event)"
+      (soumission)="soumettre($event)"
+      (publication)="publier($event)"
+    />
+  </app-panel>
+</div>

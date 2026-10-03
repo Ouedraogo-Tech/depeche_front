@@ -1,0 +1,130 @@
+<!-- En-tête -->
+<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Articles</h1>
+    <p class="mt-1 text-sm text-marine/70">Vue d'ensemble des publications · actualisée automatiquement toutes les 30 secondes</p>
+  </div>
+  <button type="button" (click)="actualiser()" class="self-start rounded-md border border-marine px-4 py-2 text-xs font-bold uppercase hover:bg-white sm:self-auto">
+    ↻ Actualiser
+  </button>
+</div>
+
+@if (articles() === undefined) {
+  <p class="mt-10 text-center text-sm text-marine/60">Chargement des articles…</p>
+} @else {
+  <!-- Les 4 cartes -->
+  <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <app-stat-card [valeur]="nbTotal()" libelle="Articles au total" />
+    <app-stat-card [valeur]="nbPublies()" libelle="Publiés" />
+    <app-stat-card [valeur]="nbEnAttente()" libelle="En attente" detail="à valider" [accent]="nbEnAttente() > 0" />
+    <app-stat-card [valeur]="nbBrouillons()" libelle="Brouillons" />
+  </div>
+
+  <!-- Publications par auteur -->
+  <div class="mt-6">
+    <app-panel titre="Publications par auteur">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b border-ligne text-[11px] uppercase tracking-wide text-marine/60">
+              <th class="py-2 pr-4 font-semibold">Auteur</th>
+              <th class="py-2 pr-4 font-semibold">Articles publiés</th>
+              <th class="py-2 pr-4 text-center font-semibold">En attente</th>
+              <th class="py-2 pr-4 text-center font-semibold">Brouillons</th>
+              <th class="py-2 text-center font-semibold">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of parAuteur(); track l.auteurId) {
+              <tr class="border-b border-ligne last:border-0">
+                <td class="whitespace-nowrap py-3 pr-4 font-semibold">{{ l.nom }}</td>
+                <!-- Barre : largeur proportionnelle au meilleur auteur -->
+                <td class="min-w-48 py-3 pr-4">
+                  <div class="flex items-center gap-3">
+                    <div class="h-2 flex-1 rounded-full bg-ligne">
+                                            <div
+                        class="barre-animee h-2 rounded-full bg-brique"
+                        [style.width.%]="(l.publies / maxPublies()) * 100"
+                        [style.animation-delay.ms]="$index * 100"
+                      ></div>
+                    </div>
+                    <span class="w-6 text-right font-bold">{{ l.publies }}</span>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 text-center">{{ l.enAttente }}</td>
+                <td class="py-3 pr-4 text-center">{{ l.brouillons }}</td>
+                <td class="py-3 text-center font-semibold">{{ l.total }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="py-6 text-center text-sm text-marine/60">Aucun article pour le moment.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-panel>
+  </div>
+
+  <!-- Tous les articles -->
+  <div class="mt-6">
+    <app-panel titre="Tous les articles">
+      <!-- Filtres : empilés sur téléphone -->
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row">
+        <input
+          type="search"
+          placeholder="Rechercher un titre ou un auteur…"
+          [value]="recherche()"
+          (input)="recherche.set($any($event.target).value)"
+          class="w-full rounded-md border border-ligne px-3 py-2 text-sm focus:border-marine focus:outline-none sm:max-w-xs"
+        />
+        <select
+          (change)="statutFiltre.set($any($event.target).value)"
+          class="rounded-md border border-ligne bg-white px-3 py-2 text-sm focus:border-marine focus:outline-none"
+        >
+          <option value="TOUS">Tous les statuts</option>
+          @for (s of statuts; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+        <span class="self-center text-xs text-marine/60">{{ articlesFiltres().length }} article(s)</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b border-ligne text-[11px] uppercase tracking-wide text-marine/60">
+              <th class="py-2 pr-4 font-semibold">Titre</th>
+              <th class="py-2 pr-4 font-semibold">Auteur</th>
+              <th class="py-2 pr-4 font-semibold">Catégorie</th>
+              <th class="py-2 pr-4 font-semibold">Statut</th>
+              <th class="py-2 pr-4 font-semibold">Date</th>
+              <th class="py-2 font-semibold"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of articlesFiltres(); track a.id) {
+              <tr class="border-b border-ligne last:border-0">
+                <td class="min-w-56 py-3 pr-4">{{ a.titre }}</td>
+                <td class="whitespace-nowrap py-3 pr-4">{{ a.auteurNomComplet }}</td>
+                <td class="whitespace-nowrap py-3 pr-4">{{ a.categorieNom }}</td>
+                <td class="py-3 pr-4"><app-status-badge [statut]="a.statut" /></td>
+                <td class="whitespace-nowrap py-3 pr-4">{{ (a.datePublication ?? a.dateCreation) | date: 'd MMM y' }}</td>
+                <td class="whitespace-nowrap py-3 text-xs">
+                  <!-- Seuls les articles publiés sont visibles sur le site -->
+                  @if (a.statut === 'PUBLIE') {
+                    <a [routerLink]="['/articles', a.id]" target="_blank" class="font-semibold text-brique hover:underline">Voir sur le site ↗</a>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="py-6 text-center text-sm text-marine/60">Aucun article ne correspond à ce filtre.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-panel>
+  </div>
+}

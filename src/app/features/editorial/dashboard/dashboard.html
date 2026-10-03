@@ -1,0 +1,76 @@
+<!-- En-tête : empilé sur téléphone, sur une ligne à partir de sm -->
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <p class="text-xs font-bold uppercase tracking-wide text-marine/60">
+      Desk éditorial · {{ aujourdhui | date: 'd MMMM y' | uppercase }}
+    </p>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Tableau de bord éditorial</h1>
+  </div>
+  <a
+    routerLink="/editorial/rediger"
+    class="self-start rounded-md bg-brique px-4 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 sm:self-auto"
+  >
+    + Rédiger un article
+  </a>
+</div>
+
+@if (chargement()) {
+  <app-spinner />
+} @else {
+  <!-- Les 4 cartes : 1 / 2 / 4 par ligne -->
+  <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <app-stat-card [valeur]="nbEnAttente()" libelle="En attente" detail="à valider" [accent]="nbEnAttente() > 0" />
+    <app-stat-card [valeur]="nbAReviser()" libelle="À réviser" detail="chez les journalistes" />
+    <app-stat-card [valeur]="nbPublies()" libelle="Publiés" [detail]="'+' + nbPubliesCeMois() + ' ce mois-ci'" />
+    <app-stat-card [valeur]="nbRefuses()" libelle="Refusés" />
+  </div>
+
+  <!-- Téléphone : empilés · grand écran : À valider (2/3) + Dernières publications (1/3) -->
+  <div class="mt-6 grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+    <!-- À valider -->
+    <app-panel titre="À valider" class="min-w-0 xl:col-span-2">
+      <a actions routerLink="/editorial/validation" class="whitespace-nowrap text-xs font-bold uppercase text-brique hover:underline">
+        Tout voir →
+      </a>
+
+      <ul class="divide-y divide-ligne">
+        @for (a of aValider(); track a.id) {
+          <li class="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:gap-4">
+            <div class="min-w-0 flex-1">
+              <p class="font-semibold">{{ a.titre }}</p>
+              <p class="mt-0.5 text-xs text-marine/60">
+                {{ a.auteurNomComplet }} · {{ a.categorieNom }} ·
+                <span [class.font-bold]="a.joursAttente >= 2" [class.text-brique]="a.joursAttente >= 2">
+                  {{ a.joursAttente === 0 ? "soumis aujourd'hui" : 'en attente depuis ' + a.joursAttente + ' j' }}
+                </span>
+              </p>
+            </div>
+            <a
+              routerLink="/editorial/validation"
+              [queryParams]="{ article: a.id }"
+              class="self-start whitespace-nowrap rounded-md bg-marine px-3 py-1.5 text-xs font-bold uppercase text-white hover:bg-marine-fonce sm:self-auto"
+            >
+              Examiner
+            </a>
+          </li>
+        } @empty {
+          <li class="py-6 text-center text-sm text-marine/60">✓ Aucun article en attente. Le desk est à jour.</li>
+        }
+      </ul>
+    </app-panel>
+
+    <!-- Dernières publications -->
+    <app-panel titre="Dernières publications" class="min-w-0">
+      <ul class="divide-y divide-ligne">
+        @for (a of dernieresPublications(); track a.id) {
+          <li class="py-3">
+            <a [routerLink]="['/articles', a.id]" class="font-semibold hover:text-brique">{{ a.titre }}</a>
+            <p class="mt-0.5 text-xs text-marine/60">{{ a.auteurNomComplet }} · {{ a.datePublication | date: 'd MMM, HH:mm' }}</p>
+          </li>
+        } @empty {
+          <li class="py-6 text-center text-sm text-marine/60">Aucun article publié.</li>
+        }
+      </ul>
+    </app-panel>
+  </div>
+}

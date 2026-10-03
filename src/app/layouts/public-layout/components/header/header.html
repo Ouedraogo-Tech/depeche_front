@@ -1,41 +1,180 @@
 <header class="bg-creme">
-  <div class="mx-auto flex max-w-7xl items-center justify-between px-10 py-5">
+  <!-- ===== LIGNE 1 : logo · recherche · compte ===== -->
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-10 lg:py-5">
 
     <!-- Logo : trait rouge + nom du site -->
     <a routerLink="/" class="flex items-center gap-3">
       <span class="h-6 w-1 bg-brique"></span>
-      <span class="font-serif text-2xl font-bold text-marine">DÉPÊCHE 226</span>
+      <span class="font-serif text-xl font-bold text-marine sm:text-2xl">DÉPÊCHE 226</span>
     </a>
 
-    <!-- Menu principal -->
-    <nav class="flex items-center gap-8 text-sm font-semibold uppercase tracking-wide">
-      <a
-        routerLink="/"
-        routerLinkActive="border-b-2 border-marine"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="pb-1"
-      >Accueil</a>
-      <!-- Liens ajoutés quand les pages existeront -->
-      <a class="flex cursor-pointer items-center gap-1 pb-1">Actualités <span class="text-xs">▾</span></a>
-      <a class="cursor-pointer pb-1">À propos</a>
-    </nav>
-
-    <!-- Recherche + Connexion -->
-    <div class="flex items-center gap-4">
+    <!-- Recherche + Compte + bouton ☰ -->
+    <div class="flex items-center gap-2 sm:gap-4">
+      <!-- Loupe : ouvre / ferme la barre de recherche -->
       <button
         type="button"
+        (click)="basculerRecherche()"
+        [attr.aria-expanded]="rechercheOuverte()"
         aria-label="Rechercher"
         class="flex h-10 w-10 items-center justify-center rounded-full border border-marine/30 hover:bg-white"
+        [class.bg-white]="rechercheOuverte()"
       >
         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
+          @if (rechercheOuverte()) {
+            <path d="M6 6l12 12M18 6L6 18" />
+          } @else {
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          }
         </svg>
       </button>
-      <a class="cursor-pointer rounded-md bg-marine px-5 py-2.5 text-sm font-bold uppercase text-white hover:bg-marine-fonce">
-        Connexion
-      </a>
-    </div>
 
+      <!-- Visiteur : Connexion · Lecteur : Bonjour + Déconnexion · Équipe : prénom + Mon espace + Déconnexion -->
+      @if (utilisateur(); as u) {
+        @if (u.roles.includes('LECTEUR')) {
+          <div class="hidden items-center gap-3 text-sm sm:flex">
+            <span class="font-semibold">Bonjour {{ u.prenom }}</span>
+            <button type="button" (click)="authService.deconnecter('/')" class="text-xs font-bold uppercase text-brique hover:underline">Déconnexion</button>
+          </div>
+        } @else {
+          <div class="hidden items-center gap-3 text-sm sm:flex">
+            <span class="hidden font-semibold lg:inline">{{ u.prenom }}</span>
+            <a [routerLink]="authService.cheminAccueil()" class="rounded-md bg-marine px-4 py-2.5 text-xs font-bold uppercase text-white hover:bg-marine-fonce">Mon espace</a>
+            <button type="button" (click)="authService.deconnecter('/')" class="text-xs font-bold uppercase text-brique hover:underline">Déconnexion</button>
+          </div>
+        }
+      } @else {
+        <a routerLink="/connexion" class="hidden rounded-md bg-marine px-5 py-2.5 text-sm font-bold uppercase text-white hover:bg-marine-fonce sm:inline-block">Connexion</a>
+      }
+
+      <!-- Bouton ☰ : seulement sur téléphone / petite tablette -->
+      <button
+        type="button"
+        (click)="menuOuvert.set(!menuOuvert()); rechercheOuverte.set(false)"
+        [attr.aria-expanded]="menuOuvert()"
+        aria-label="Menu"
+        class="flex h-10 w-10 items-center justify-center rounded-md text-marine hover:bg-white md:hidden"
+      >
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          @if (menuOuvert()) {
+            <path d="M6 6l12 12M18 6L6 18" />
+          } @else {
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          }
+        </svg>
+      </button>
+    </div>
   </div>
+
+  <!-- ===== LIGNE 2 : la barre rouge des rubriques =====
+       Tous les liens sont rouges ; la page ouverte est simplement soulignée en blanc.
+       Hauteur de la barre : py-4 (téléphone / tablette), lg:py-5 (ordinateur). -->
+  <nav class="bg-brique text-white" aria-label="Rubriques">
+    <div class="mx-auto flex max-w-7xl items-stretch px-0 sm:px-6 lg:px-10">
+
+      <!-- Accueil (souligné quand on est sur l'accueil sans filtre) -->
+      <a
+        routerLink="/"
+        routerLinkActive="underline decoration-2 underline-offset-8"
+        [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }"
+        class="flex shrink-0 items-center px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
+      >Accueil</a>
+
+      <!-- Actualités ▾ : menu déroulant de TOUTES les rubriques (ordinateur ; hors de la zone qui défile, sinon il serait coupé) -->
+      <div class="group relative hidden shrink-0 md:block">
+        <button type="button" class="flex h-full items-center gap-1 px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5">
+          Actualités <span class="text-xs">▾</span>
+        </button>
+        <div class="invisible absolute left-0 top-full z-40 pt-1 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+          <div class="w-56 rounded-b-lg border border-ligne bg-white py-2 text-marine shadow-lg">
+            <a routerLink="/" class="block px-4 py-2 text-sm font-semibold hover:bg-creme">Toutes les actualités</a>
+            @for (r of rubriques(); track r.id) {
+              <a routerLink="/" [queryParams]="{ rubrique: r.id }" class="block px-4 py-2 text-sm hover:bg-creme">{{ r.nom }}</a>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Les rubriques à l'horizontale : défilent du doigt si elles ne tiennent pas (téléphone, ou beaucoup de rubriques) -->
+      <div class="flex min-w-0 flex-1 overflow-x-auto">
+        @for (r of rubriques(); track r.id) {
+          <a
+            routerLink="/"
+            [queryParams]="{ rubrique: r.id }"
+            routerLinkActive="underline decoration-2 underline-offset-8"
+            [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }"
+            class="flex shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
+          >{{ r.nom }}</a>
+        }
+      </div>
+
+      <!-- À propos : collé à droite -->
+      <a
+        routerLink="/a-propos"
+        routerLinkActive="underline decoration-2 underline-offset-8"
+        class="flex shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
+      >À propos</a>
+    </div>
+  </nav>
+
+  <!-- ===== Barre de recherche (sous la barre rouge) : Entrée pour chercher, Échap pour fermer ===== -->
+  @if (rechercheOuverte()) {
+    <div class="border-b border-ligne bg-white">
+      <form
+        (submit)="$event.preventDefault(); rechercher()"
+        (keydown.escape)="rechercheOuverte.set(false)"
+        class="mx-auto flex max-w-3xl flex-col gap-2 px-4 py-4 sm:flex-row sm:px-6"
+        role="search"
+      >
+        <label for="recherche-site" class="sr-only">Rechercher un article</label>
+        <input
+          #champRecherche
+          id="recherche-site"
+          type="search"
+          placeholder="Rechercher un article : coton, élections, Étalons…"
+          [value]="saisie()"
+          (input)="saisie.set($any($event.target).value)"
+          class="min-w-0 flex-1 rounded-md border border-ligne px-4 py-3 text-sm focus:border-marine focus:outline-none"
+        />
+        <button type="submit" class="rounded-md bg-marine px-6 py-3 text-xs font-bold uppercase text-white hover:bg-marine-fonce">
+          Rechercher
+        </button>
+      </form>
+    </div>
+  }
+
+  <!-- ===== Menu ☰ (téléphone) : le compte (les rubriques sont déjà dans la barre rouge) ===== -->
+  @if (menuOuvert()) {
+    <nav class="flex flex-col gap-1 border-b border-ligne px-4 pb-4 pt-2 text-sm font-semibold uppercase tracking-wide md:hidden">
+      <a routerLink="/" (click)="menuOuvert.set(false)" class="rounded-md px-3 py-2.5 hover:bg-white">Accueil</a>
+      <a routerLink="/a-propos" (click)="menuOuvert.set(false)" class="rounded-md px-3 py-2.5 hover:bg-white">À propos</a>
+
+      @if (utilisateur(); as u) {
+        <p class="mt-2 px-3 normal-case tracking-normal text-marine/70">Connecté : {{ u.prenom }} {{ u.nom }}</p>
+        @if (!u.roles.includes('LECTEUR')) {
+          <a
+            [routerLink]="authService.cheminAccueil()"
+            (click)="menuOuvert.set(false)"
+            class="rounded-md bg-marine px-3 py-2.5 text-center text-white"
+          >Mon espace</a>
+        }
+        <button
+          type="button"
+          (click)="menuOuvert.set(false); authService.deconnecter('/')"
+          class="rounded-md border border-brique px-3 py-2.5 uppercase text-brique"
+        >Déconnexion</button>
+      } @else {
+        <a
+          routerLink="/connexion"
+          (click)="menuOuvert.set(false)"
+          class="mt-2 rounded-md bg-marine px-3 py-2.5 text-center text-white"
+        >Connexion</a>
+        <a
+          routerLink="/inscription"
+          (click)="menuOuvert.set(false)"
+          class="rounded-md border border-marine px-3 py-2.5 text-center"
+        >Créer un compte</a>
+      }
+    </nav>
+  }
 </header>

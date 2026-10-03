@@ -1,0 +1,157 @@
+<!-- En-tête -->
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Mes articles</h1>
+    <p class="mt-1 text-sm text-marine/70">Tous vos articles, du plus récent au plus ancien</p>
+  </div>
+  <a
+    [routerLink]="espace === '/editorial' ? '/editorial/rediger' : '/journaliste/nouvel-article'"
+    class="self-start rounded-md bg-brique px-4 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 sm:self-auto"
+  >
+    + Nouvel article
+  </a>
+</div>
+
+<!-- Onglets par statut : défilent horizontalement sur téléphone -->
+<div class="-mx-4 mt-6 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+  <div class="flex w-max gap-2">
+    @for (o of onglets; track o.valeur) {
+      <button
+        type="button"
+        (click)="ongletActif.set(o.valeur)"
+        class="whitespace-nowrap rounded-full border px-3.5 py-1.5 text-xs font-semibold"
+        [class]="ongletActif() === o.valeur ? 'border-marine bg-marine text-white' : 'border-ligne bg-white text-marine hover:bg-creme'"
+      >
+        {{ o.libelle }} <span class="opacity-70">({{ compteurs().get(o.valeur) ?? 0 }})</span>
+      </button>
+    }
+  </div>
+</div>
+
+<!-- Recherche -->
+<input
+  type="search"
+  placeholder="Rechercher par titre ou catégorie…"
+  [value]="recherche()"
+  (input)="recherche.set($any($event.target).value)"
+  class="mt-4 w-full rounded-md border border-ligne bg-white px-3 py-2.5 text-sm focus:border-marine focus:outline-none sm:max-w-md"
+/>
+
+@if (erreur()) {
+  <p class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+}
+
+@if (articles() === undefined) {
+  <app-spinner />
+} @else {
+  <!-- Une carte par article : empilée sur téléphone, sur une ligne à partir de md -->
+  <ul class="mt-4 space-y-3">
+    @for (a of lignes(); track a.id) {
+      <li class="flex flex-col gap-3 rounded-xl border border-ligne bg-white p-4 md:flex-row md:items-center md:gap-4">
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold">{{ a.titre }}</p>
+          <p class="mt-0.5 text-xs text-marine/60">
+            {{ a.categorieNom }} ·
+            @if (a.statut === 'PLANIFIE') {
+              <span class="font-semibold text-blue-800">publication prévue le {{ a.datePublication | date: 'd MMM y à HH:mm' }}</span>
+            } @else {
+              {{ a.datePublication ? 'publié le' : 'créé le' }} {{ a.dateReference | date: 'd MMM y' }}
+            }
+          </p>
+          <!-- Retour du responsable éditorial -->
+          @if (a.commentaireEditorial && (a.statut === 'A_REVISER' || a.statut === 'REFUSE')) {
+            <p class="mt-2 rounded-md bg-red-50 px-2.5 py-1.5 text-xs text-red-800">Retour : {{ a.commentaireEditorial }}</p>
+          }
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 md:justify-end">
+          <app-status-badge [statut]="a.statut" />
+          @if (statutsModifiables.includes(a.statut)) {
+            <a [routerLink]="[espace, 'articles', a.id, 'modifier']" class="text-xs font-bold uppercase text-marine hover:underline">Modifier</a>
+            <button type="button" (click)="aSupprimer.set(a)" class="text-xs font-bold uppercase text-brique/70 hover:text-brique hover:underline">Supprimer</button>
+          }
+          @if (boutonSoumettre() && (a.statut === 'BROUILLON' || a.statut === 'A_REVISER')) {
+            <button type="button" (click)="soumettre(a)" class="text-xs font-bold uppercase text-brique hover:underline">Soumettre</button>
+          }
+          @if (statutsPubliables.includes(a.statut)) {
+            <button type="button" (click)="publier(a)" class="text-xs font-bold uppercase text-marine hover:underline">Publier</button>
+            <button type="button" (click)="ouvrirPlanification(a)" class="text-xs font-bold uppercase text-blue-800 hover:underline">Planifier</button>
+          }
+          @if (a.statut === 'PLANIFIE') {
+            <button type="button" (click)="ouvrirPlanification(a)" class="text-xs font-bold uppercase text-blue-800 hover:underline">Changer la date</button>
+            <button type="button" (click)="annulerPlanification(a)" class="text-xs font-bold uppercase text-brique/70 hover:text-brique hover:underline">Annuler</button>
+          }
+          @if (a.statut === 'PUBLIE') {
+            <a [routerLink]="['/articles', a.id]" class="text-xs font-bold uppercase text-marine hover:underline">Voir sur le site ↗</a>
+            <button type="button" (click)="aArchiver.set(a)" class="text-xs font-bold uppercase text-marine/60 hover:text-marine hover:underline">Archiver</button>
+          }
+        </div>
+      </li>
+    } @empty {
+      <li>
+        @if (articles()!.length === 0) {
+          <app-empty-state icone="✍️" message="Vous n'avez encore écrit aucun article." lienTexte="+ Nouvel article" [lien]="espace === '/editorial' ? '/editorial/rediger' : '/journaliste/nouvel-article'" />
+        } @else {
+          <app-empty-state icone="🔍" message="Aucun article ne correspond à ce filtre." />
+        }
+      </li>
+    }
+  </ul>
+}
+
+<!-- ===== Fenêtre "Planifier la publication" ===== -->
+@if (aPlanifier(); as a) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-marine/50 p-4" (click)="aPlanifier.set(null)">
+    <form
+      class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+      role="dialog"
+      aria-modal="true"
+      (click)="$event.stopPropagation()"
+      (submit)="$event.preventDefault(); planifier()"
+    >
+      <h2 class="font-serif text-xl font-bold">Planifier la publication</h2>
+      <p class="mt-1 text-sm text-marine/70">« {{ a.titre }} » sera publié automatiquement à cette date.</p>
+
+      <label for="date-planifiee" class="mb-1 mt-5 block text-xs font-bold uppercase tracking-wide text-marine/70">Date et heure</label>
+      <input
+        id="date-planifiee"
+        type="datetime-local"
+        required
+        [min]="dateMinimum()"
+        [value]="datePlanifiee()"
+        (input)="datePlanifiee.set($any($event.target).value)"
+        class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+      />
+      <p class="mt-2 text-xs text-marine/50">La publication se fait dans la minute qui suit l'heure choisie.</p>
+
+      <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <button type="button" (click)="aPlanifier.set(null)" class="rounded-md border border-marine px-4 py-2 text-xs font-bold uppercase text-marine">
+          Annuler
+        </button>
+        <button type="submit" class="rounded-md bg-blue-800 px-4 py-2 text-xs font-bold uppercase text-white hover:bg-blue-900">
+          Planifier
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (aArchiver(); as a) {
+  <app-confirm-dialog
+    titre="Archiver cet article ?"
+    [message]="'« ' + a.titre + ' » sera retiré du site, mais restera dans vos archives.'"
+    libelleConfirmer="Archiver"
+    (confirme)="archiver()"
+    (annule)="aArchiver.set(null)"
+  />
+}
+
+@if (aSupprimer(); as a) {
+  <app-confirm-dialog
+    titre="Supprimer cet article ?"
+    [message]="'« ' + a.titre + ' »' + (a.statut === 'PUBLIE' ? ' sera retiré du site et' : '') + ' sera définitivement supprimé, avec ses commentaires. Cette action est irréversible.'"
+    libelleConfirmer="Supprimer"
+    (confirme)="supprimer()"
+    (annule)="aSupprimer.set(null)"
+  />
+}

@@ -1,0 +1,41 @@
+@if (url(); as image) {
+  <!-- Aperçu de la photo envoyée -->
+  <div class="relative overflow-hidden rounded-lg border border-ligne">
+    <img [src]="image" alt="Image principale de l'article" class="h-48 w-full object-cover sm:h-64" />
+    <button
+      type="button"
+      (click)="retirer()"
+      class="absolute right-2 top-2 rounded-md bg-white/90 px-3 py-1.5 text-xs font-bold uppercase text-brique shadow"
+    >
+      Retirer
+    </button>
+  </div>
+} @else {
+  <!-- Zone de dépôt : un <label> autour du champ fichier = toute la zone est cliquable -->
+  <label
+    class="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed px-4 py-8 text-center transition"
+    [class.border-marine]="survol()"
+    [class.bg-white]="survol()"
+    [class.border-sable]="!survol()"
+    (dragover)="$event.preventDefault(); survol.set(true)"
+    (dragleave)="survol.set(false)"
+    (drop)="deposer($event)"
+  >
+    <input
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      class="sr-only"
+      [disabled]="enCours()"
+      (change)="choisir($event)"
+    />
+    <span class="text-2xl" aria-hidden="true">🖼️</span>
+    <span class="text-sm font-semibold">
+      {{ enCours() ? 'Envoi de la photo…' : 'Glissez la photo ici ou cliquez pour la choisir' }}
+    </span>
+    <span class="text-xs text-marine/60">JPG, PNG ou WEBP · 5 Mo maximum</span>
+  </label>
+}
+
+@if (erreur()) {
+  <p class="mt-1 text-xs text-brique">{{ erreur() }}</p>
+}

@@ -1,0 +1,102 @@
+<!-- En-tête -->
+<div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Personnel</h1>
+    <p class="mt-1 text-sm text-marine/70">Comptes de l'équipe : consulter, modifier, attribuer un rôle, désactiver</p>
+  </div>
+  <a routerLink="/admin/personnel/nouveau" class="self-start whitespace-nowrap rounded-md bg-brique px-4 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 sm:self-auto">
+    + Créer un compte
+  </a>
+</div>
+
+@if (utilisateurs() === undefined) {
+  <p class="mt-10 text-center text-sm text-marine/60">Chargement du personnel…</p>
+} @else {
+  <!-- Chiffres -->
+  <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <app-stat-card [valeur]="utilisateurs()!.length" libelle="Comptes" />
+    <app-stat-card [valeur]="nbActifs()" libelle="Actifs" />
+    <app-stat-card [valeur]="nbDesactives()" libelle="Désactivés" [accent]="nbDesactives() > 0" />
+  </div>
+
+  <div class="mt-6">
+    <app-panel titre="Liste du personnel">
+      <!-- Filtres : empilés sur téléphone -->
+      <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        <input
+          type="search"
+          placeholder="Rechercher un nom ou un email…"
+          [value]="recherche()"
+          (input)="recherche.set($any($event.target).value)"
+          class="w-full rounded-md border border-ligne px-3 py-2 text-sm focus:border-marine focus:outline-none sm:max-w-xs"
+        />
+        <select (change)="roleFiltre.set($any($event.target).value)" class="rounded-md border border-ligne bg-white px-3 py-2 text-sm">
+          <option value="TOUS">Tous les rôles</option>
+          @for (r of roles; track r) {
+            <option [value]="r">{{ libellesRoles[r] }}</option>
+          }
+        </select>
+        <select (change)="statutFiltre.set($any($event.target).value)" class="rounded-md border border-ligne bg-white px-3 py-2 text-sm">
+          <option value="TOUS">Tous les statuts</option>
+          <option value="ACTIF">Actifs</option>
+          <option value="DESACTIVE">Désactivés</option>
+        </select>
+        <span class="self-center text-xs text-marine/60">{{ utilisateursFiltres().length }} compte(s)</span>
+      </div>
+
+      @if (erreurAction()) {
+        <p class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreurAction() }}</p>
+      }
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b border-ligne text-[11px] uppercase tracking-wide text-marine/60">
+              <th class="py-2 pr-4 font-semibold">Nom</th>
+              <th class="py-2 pr-4 font-semibold">E-mail</th>
+              <th class="py-2 pr-4 font-semibold">Rôle</th>
+              <th class="py-2 pr-4 font-semibold">Statut</th>
+              <th class="py-2 pr-4 font-semibold">Inscrit le</th>
+              <th class="py-2 font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of utilisateursFiltres(); track u.id) {
+              <tr class="border-b border-ligne last:border-0">
+                <td class="whitespace-nowrap py-3 pr-4 font-semibold">{{ u.prenom }} {{ u.nom }}</td>
+                <td class="py-3 pr-4">{{ u.email }}</td>
+                <td class="py-3 pr-4">
+                  <span class="whitespace-nowrap rounded-full border border-sable bg-creme px-2.5 py-0.5 text-xs">{{ libellesRoles[u.roles[0]] }}</span>
+                </td>
+                <td class="py-3 pr-4"><app-status-badge [statut]="u.actif ? 'ACTIF' : 'DESACTIVE'" /></td>
+                <td class="whitespace-nowrap py-3 pr-4">{{ u.dateInscription ? (u.dateInscription | date: 'd MMM y') : '—' }}</td>
+                <td class="whitespace-nowrap py-3 text-xs">
+                  <a [routerLink]="['/admin/personnel', u.id]" class="mr-3 font-semibold text-marine hover:underline">Voir</a>
+                  <a [routerLink]="['/admin/personnel', u.id, 'modifier']" class="mr-3 font-semibold text-marine hover:underline">Modifier</a>
+                  <button type="button" (click)="aConfirmer.set(u)" class="font-semibold text-brique hover:underline">
+                    {{ u.actif ? 'Désactiver' : 'Réactiver' }}
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="6" class="py-6 text-center text-sm text-marine/60">Aucun compte ne correspond à ces filtres.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-panel>
+  </div>
+}
+
+<!-- Fenêtre de confirmation -->
+@if (aConfirmer(); as compte) {
+  <app-confirm-dialog
+    [titre]="compte.actif ? 'Désactiver ce compte ?' : 'Réactiver ce compte ?'"
+    [message]="compte.prenom + ' ' + compte.nom + (compte.actif ? ' ne pourra plus se connecter.' : ' pourra de nouveau se connecter.')"
+    [libelleConfirmer]="compte.actif ? 'Désactiver' : 'Réactiver'"
+    (confirme)="confirmerChangementStatut()"
+    (annule)="aConfirmer.set(null)"
+  />
+}

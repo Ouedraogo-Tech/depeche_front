@@ -1,0 +1,12 @@
+<section class="rounded-xl border border-ligne bg-white p-6">
+  @if (titre()) {
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <h2 class="font-serif text-lg font-bold text-marine">{{ titre() }}</h2>
+      <!-- Emplacement "actions" : un bouton à droite du titre -->
+      <ng-content select="[actions]" />
+    </div>
+  }
+
+  <!-- Emplacement principal : tout le reste du contenu -->
+  <ng-content />
+</section>

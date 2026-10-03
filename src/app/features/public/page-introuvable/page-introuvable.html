@@ -1,0 +1,30 @@
+<div class="mx-auto max-w-5xl">
+  <div class="py-8 text-center sm:py-14">
+    <p class="font-serif text-7xl font-bold text-brique sm:text-9xl">404</p>
+    <h1 class="mt-4 font-serif text-2xl font-bold sm:text-3xl">Page introuvable</h1>
+    <p class="mx-auto mt-3 max-w-xl text-marine/70">
+      L'adresse <span class="break-all font-semibold text-marine">{{ adresse }}</span> n'existe pas,
+      ou l'article a été retiré du site.
+    </p>
+
+    <!-- Boutons : empilés sur téléphone, côte à côte à partir de sm -->
+    <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+      <a routerLink="/" class="rounded-md bg-brique px-6 py-3 text-xs font-bold uppercase text-white hover:opacity-90">
+        Retour à l'accueil
+      </a>
+      <a routerLink="/a-propos" class="rounded-md border border-marine px-6 py-3 text-xs font-bold uppercase hover:bg-white">
+        Contacter la rédaction
+      </a>
+    </div>
+  </div>
+
+  <!-- Quelques articles récents -->
+  @if (suggestions().length > 0) {
+    <h2 class="mt-6 text-center font-serif text-xl font-bold sm:text-2xl">À lire en ce moment</h2>
+    <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (a of suggestions(); track a.id) {
+        <app-article-card [article]="a" />
+      }
+    </div>
+  }
+</div>

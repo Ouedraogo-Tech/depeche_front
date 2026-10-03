@@ -1,0 +1,31 @@
+<div class="mx-auto max-w-lg py-6 sm:py-12">
+  <div class="rounded-xl border border-ligne bg-white p-6 text-center sm:p-10">
+    @switch (etat()) {
+      @case ('en-cours') {
+        <app-spinner texte="Désabonnement en cours…" />
+      }
+      @case ('fait') {
+        <p class="text-5xl" aria-hidden="true">✉️</p>
+        <h1 class="mt-4 font-serif text-2xl font-bold sm:text-3xl">Vous êtes désabonné(e)</h1>
+        <p class="mt-3 text-marine/70">
+          Vous ne recevrez plus la newsletter de Dépêche 226. Vous pouvez vous réabonner à tout moment
+          depuis le bas de n'importe quelle page du site.
+        </p>
+      }
+      @case ('invalide') {
+        <p class="text-5xl" aria-hidden="true">⚠️</p>
+        <h1 class="mt-4 font-serif text-2xl font-bold sm:text-3xl">Lien invalide</h1>
+        <p class="mt-3 text-marine/70">
+          Ce lien de désabonnement n'est pas valide ou est incomplet. Utilisez le lien « Se désabonner »
+          présent en bas de l'e-mail reçu, ou contactez la rédaction.
+        </p>
+      }
+    }
+
+    @if (etat() !== 'en-cours') {
+      <a routerLink="/" class="mt-8 inline-block rounded-md bg-brique px-6 py-3 text-xs font-bold uppercase text-white hover:opacity-90">
+        Retour à l'accueil
+      </a>
+    }
+  </div>
+</div>

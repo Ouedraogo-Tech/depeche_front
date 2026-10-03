@@ -1,0 +1,77 @@
+<!-- En-tête : empilé sur téléphone, sur une ligne à partir de sm -->
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Rôles & permissions</h1>
+    <p class="mt-1 text-sm text-marine/70">Ce que chaque rôle a le droit de faire · le rôle d'un compte se change depuis Personnel → Modifier</p>
+  </div>
+  @if (roles()?.length) {
+    <button
+      type="button"
+      (click)="toutBasculer()"
+      class="self-start rounded-md border border-marine px-4 py-2.5 text-xs font-bold uppercase text-marine hover:bg-white sm:self-auto"
+    >
+      {{ toutOuvert() ? 'Tout replier' : 'Tout déplier' }}
+    </button>
+  }
+</div>
+
+@if (roles(); as liste) {
+  <!-- 1 carte par ligne sur téléphone, 2 sur tablette, 3 sur grand écran ; items-start : ouvrir une carte n'étire pas les autres -->
+  <div class="mt-6 grid grid-cols-1 items-start gap-5 md:grid-cols-2 xl:grid-cols-3">
+    @for (role of liste; track role.id) {
+      <section class="overflow-hidden rounded-xl border border-ligne bg-white shadow-sm">
+        <!-- En-tête de la carte : pastille, nom, description -->
+        <div class="flex items-start gap-4 p-5">
+          <span
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-serif text-lg font-bold text-white"
+            [class]="presentation[role.nom]?.couleur ?? 'bg-marine'"
+          >{{ libellesRoles[role.nom].charAt(0) }}</span>
+          <div class="min-w-0 flex-1">
+            <h2 class="font-serif text-lg font-bold leading-tight">{{ libellesRoles[role.nom] }}</h2>
+            <p class="mt-0.5 text-sm text-marine/60">{{ presentation[role.nom]?.description }}</p>
+          </div>
+        </div>
+
+        <!-- Chiffres -->
+        <div class="flex flex-wrap gap-2 px-5">
+          <span class="rounded-full bg-creme px-3 py-1 text-xs font-semibold">👥 {{ nombreDeComptes(role.nom) }} compte(s)</span>
+          <span class="rounded-full bg-creme px-3 py-1 text-xs font-semibold">🔑 {{ role.permissions.length }} permission(s)</span>
+        </div>
+
+        <!-- Bouton qui ouvre / ferme la liste -->
+        <button
+          type="button"
+          (click)="basculer(role.id)"
+          [attr.aria-expanded]="ouverts().has(role.id)"
+          class="mt-4 flex w-full items-center justify-between border-t border-ligne px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-marine hover:bg-creme"
+        >
+          {{ ouverts().has(role.id) ? 'Masquer les permissions' : 'Voir les permissions' }}
+          <span class="text-base transition-transform duration-200" [class.rotate-180]="ouverts().has(role.id)">▾</span>
+        </button>
+
+        <!-- Liste déroulante : les permissions rangées par famille -->
+        @if (ouverts().has(role.id)) {
+          <div class="space-y-4 border-t border-ligne bg-creme/50 px-5 py-4">
+            @for (groupe of parGroupe(role.permissions); track groupe.titre) {
+              <div>
+                <p class="text-[11px] font-bold uppercase tracking-wider text-marine/50">{{ groupe.icone }} {{ groupe.titre }}</p>
+                <ul class="mt-1.5 space-y-1">
+                  @for (libelle of groupe.libelles; track libelle) {
+                    <li class="flex items-start gap-2 text-sm">
+                      <span class="mt-0.5 text-green-700">✓</span>
+                      <span>{{ libelle }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            } @empty {
+              <p class="text-sm text-marine/60">Aucune permission.</p>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+} @else {
+  <app-spinner />
+}
