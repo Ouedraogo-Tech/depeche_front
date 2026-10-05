@@ -2,7 +2,7 @@
 
   <!-- Barre du haut : seulement sur téléphone / tablette (cachée à partir de lg) -->
   <header class="sticky top-0 z-30 flex items-center justify-between bg-marine px-4 py-3 text-white lg:hidden">
-    <p class="font-serif text-lg font-bold">DÉPÊCHE 226</p>
+    <img src="images/logo/logo-blanc.png" alt="Dépêche 226" width="568" height="96" class="h-7 w-auto" />
     <button type="button" (click)="menuOuvert.set(true)" aria-label="Ouvrir le menu" class="rounded-md p-2 hover:bg-white/10">
       <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M4 6h16M4 12h16M4 18h16" />
@@ -23,8 +23,8 @@
   >
     <div class="flex items-start justify-between px-2">
       <div>
-        <p class="font-serif text-xl font-bold">DÉPÊCHE 226</p>
-        <p class="text-[11px] uppercase tracking-wider text-white/60">{{ espace().titre }}</p>
+        <img src="images/logo/logo-blanc.png" alt="Dépêche 226" width="568" height="96" class="h-7 w-auto" />
+        <p class="mt-2 text-[11px] uppercase tracking-wider text-white/60">{{ espace().titre }}</p>
       </div>
       <!-- Bouton fermer : seulement sur téléphone -->
       <button type="button" (click)="menuOuvert.set(false)" aria-label="Fermer le menu" class="rounded-md p-1 text-xl leading-none hover:bg-white/10 lg:hidden">
