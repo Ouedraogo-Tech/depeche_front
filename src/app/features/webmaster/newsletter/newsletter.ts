@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
 
 import { ArticleService } from '../../../core/api/article.service';
 import { NewsletterService } from '../../../core/api/newsletter.service';
@@ -61,6 +61,35 @@ export class Newsletter {
       .filter((a) => !texte || a.email.includes(texte))
       .sort((x, y) => y.dateAbonnement.localeCompare(x.dateAbonnement));
   });
+
+  // ===== Pagination de la liste (5 abonnés par page par défaut) =====
+  protected readonly taillesPage = [5, 10, 20, 50];
+  protected readonly taillePage = signal(5);
+  // Page courante (1 = première) : revient à 1 dès que l'onglet, la recherche ou la taille de page change
+  protected readonly page = linkedSignal({
+    source: () => ({ o: this.onglet(), r: this.recherche(), t: this.taillePage() }),
+    computation: () => 1,
+  });
+  protected readonly nbPages = computed(() => Math.max(1, Math.ceil(this.lignes().length / this.taillePage())));
+  // Les abonnés de la page affichée seulement
+  protected readonly lignesPage = computed(() => {
+    const page = Math.min(this.page(), this.nbPages());
+    const debut = (page - 1) * this.taillePage();
+    return this.lignes().slice(debut, debut + this.taillePage());
+  });
+  // Texte "6–10 sur 1 250"
+  protected readonly intervalle = computed(() => {
+    const total = this.lignes().length;
+    if (total === 0) {
+      return '0 sur 0';
+    }
+    const debut = (Math.min(this.page(), this.nbPages()) - 1) * this.taillePage() + 1;
+    return `${debut}–${Math.min(debut + this.taillePage() - 1, total)} sur ${total}`;
+  });
+
+  protected allerPage(numero: number): void {
+    this.page.set(Math.min(Math.max(1, numero), this.nbPages()));
+  }
 
   // ===== Composer et envoyer la newsletter =====
   protected readonly maxArticles = MAX_ARTICLES;

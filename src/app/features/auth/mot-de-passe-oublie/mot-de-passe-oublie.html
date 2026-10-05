@@ -1,0 +1,51 @@
+<!-- Page seule : la carte centrée sur l'écran (même style que la connexion) -->
+<div class="flex min-h-screen flex-col items-center justify-center px-4 py-10">
+  <a routerLink="/" class="mb-6 flex items-center gap-3">
+    <span class="h-7 w-1 bg-brique"></span>
+    <span class="font-serif text-2xl font-bold text-marine sm:text-3xl">DÉPÊCHE 226</span>
+  </a>
+
+  <div class="w-full max-w-md rounded-xl border border-ligne bg-white p-6 shadow-sm sm:p-8">
+    <h1 class="font-serif text-2xl font-bold sm:text-3xl">Mot de passe oublié</h1>
+
+    @if (envoye()) {
+      <!-- Même message que le compte existe ou non (on ne révèle pas quelles adresses ont un compte) -->
+      <div class="mt-5 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800">
+        ✓ Si un compte correspond à cette adresse, vous allez recevoir un e-mail avec un lien pour choisir un nouveau mot de passe.
+        Pensez à regarder dans vos courriers indésirables.
+      </div>
+    } @else {
+      <p class="mt-1 text-sm text-marine/70">Saisissez l'adresse e-mail de votre compte.</p>
+
+      <form class="mt-6 space-y-4" [formGroup]="formulaire" (ngSubmit)="envoyer()">
+        <div>
+          <label for="email" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">E-mail</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+          />
+          @if (formulaire.controls.email.touched && formulaire.controls.email.invalid) {
+            <p class="mt-1 text-xs text-brique">Saisissez une adresse e-mail valide.</p>
+          }
+        </div>
+
+        @if (erreur()) {
+          <p class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+        }
+
+        <button
+          type="submit"
+          [disabled]="chargement()"
+          class="w-full rounded-md bg-marine py-3 text-sm font-bold uppercase text-white hover:bg-marine-fonce disabled:opacity-60"
+        >
+          {{ chargement() ? 'Envoi…' : 'Recevoir le lien' }}
+        </button>
+      </form>
+    }
+  </div>
+
+  <a routerLink="/connexion" class="mt-6 text-xs font-bold uppercase tracking-wide text-marine/60 hover:text-marine">← Retour à la connexion</a>
+</div>

@@ -56,10 +56,33 @@
     </div>
   </div>
 
+  <!-- Réseaux sociaux : un logo cliquable par réseau renseigné par le webmaster (s'ouvre dans un nouvel onglet) -->
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 pb-8 sm:px-6 lg:px-10">
+    @for (r of reseaux; track r.nom) {
+      @if (lien(r.champ); as url) {
+        <a
+          [href]="url"
+          target="_blank"
+          rel="noopener noreferrer"
+          [attr.aria-label]="r.libelle + ' de ' + parametres().nomSite"
+          [title]="r.libelle"
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 transition hover:bg-brique hover:text-white [--fond-icone:#0F1B33] hover:[--fond-icone:#C0392B]"
+        >
+          <app-icone-reseau [nom]="r.nom" class="h-5 w-5" />
+        </a>
+      }
+    }
+  </div>
+
   <!-- Ligne du bas : empilée sur téléphone, côte à côte à partir de md -->
   <div class="border-t border-white/10">
-    <div class="mx-auto flex max-w-7xl flex-col justify-between gap-2 px-4 py-5 text-xs text-white/50 sm:px-6 md:flex-row lg:px-10">
+    <div class="mx-auto flex max-w-7xl flex-col justify-between gap-2 px-4 py-5 text-xs text-white/50 sm:px-6 md:flex-row md:items-center lg:px-10">
       <p>© {{ annee }} {{ parametres().nomSite }} — Tous droits réservés.</p>
+      <!-- Pages légales (textes rédigés par le webmaster) -->
+      <p class="flex flex-wrap gap-x-4 gap-y-1">
+        <a routerLink="/mentions-legales" class="hover:text-white">Mentions légales</a>
+        <a routerLink="/confidentialite" class="hover:text-white">Politique de confidentialité</a>
+      </p>
       @if (parametres().mentionEdition) {
         <p>{{ parametres().mentionEdition }}</p>
       }

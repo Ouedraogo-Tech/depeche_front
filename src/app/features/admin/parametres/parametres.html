@@ -1,11 +1,4 @@
 <h1 class="font-serif text-2xl font-bold sm:text-3xl">Paramètres du site</h1>
-<p class="mt-1 text-sm text-marine/70">
-  @if (modifiable()) {
-    Informations affichées dans le pied de page de toutes les pages du site.
-  } @else {
-    Informations affichées dans le pied de page · lecture seule : elles sont modifiées par le webmaster.
-  }
-</p>
 
 @if (parametres() === undefined) {
   <app-spinner />
@@ -53,6 +46,54 @@
             <input id="mentionEdition" formControlName="mentionEdition" placeholder="Ex. : Édité par …" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
           </div>
 
+          <!-- ===== Réseaux sociaux : un lien par réseau (vide = logo caché dans le footer) ===== -->
+          <div class="border-t border-ligne pt-4 md:col-span-2">
+            <p class="text-sm font-bold">Réseaux sociaux</p>
+          </div>
+          @for (r of reseaux; track r.nom) {
+            <div>
+              <label [for]="r.champ" class="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-marine/70">
+                <app-icone-reseau [nom]="r.nom" class="h-4 w-4 text-marine [--fond-icone:#fff]" /> {{ r.libelle }}
+              </label>
+              <input
+                [id]="r.champ"
+                type="url"
+                [formControlName]="r.champ"
+                class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+              />
+              @if (aUneErreur($any(r.champ))) {
+                <p class="mt-1 text-xs text-brique">Le lien doit commencer par https://</p>
+              }
+            </div>
+          }
+
+          <!-- ===== Pages légales : texte libre (les retours à la ligne sont conservés) ===== -->
+          <div class="border-t border-ligne pt-4 md:col-span-2">
+            <p class="text-sm font-bold">Pages légales</p>
+          </div>
+          <div class="md:col-span-2">
+            <label for="mentionsLegales" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Mentions légales</label>
+            <textarea
+              id="mentionsLegales"
+              rows="8"
+              formControlName="mentionsLegales"
+              placeholder="Rédigez ici les mentions légales du site"
+              class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+            ></textarea>
+            @if (aUneErreur('mentionsLegales')) { <p class="mt-1 text-xs text-brique">30 000 caractères maximum.</p> }
+          </div>
+          <div class="md:col-span-2">
+            <label for="politiqueConfidentialite" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Politique de confidentialité</label>
+            <textarea
+              id="politiqueConfidentialite"
+              rows="8"
+              formControlName="politiqueConfidentialite"
+              placeholder="Rédigez ici la politique de confidentialité du site"
+              class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+            ></textarea>
+            @if (aUneErreur('politiqueConfidentialite')) { <p class="mt-1 text-xs text-brique">30 000 caractères maximum.</p> }
+          </div>
+
           <div class="flex flex-col gap-3 sm:flex-row sm:justify-end md:col-span-2">
             <button type="button" (click)="annuler()" [disabled]="formulaire.pristine" class="rounded-md border border-marine px-5 py-2.5 text-xs font-bold uppercase disabled:opacity-40">
               Annuler les changements
@@ -82,6 +123,14 @@
             @if (apercu().telephone) { <li>☎ {{ apercu().telephone }}</li> }
             @if (apercu().emailContact) { <li>✉ {{ apercu().emailContact }}</li> }
           </ul>
+          <!-- Logos des réseaux renseignés -->
+          <div class="mt-4 flex flex-wrap gap-3">
+            @for (r of reseaux; track r.nom) {
+              @if (lienApercu(r.champ)) {
+                <app-icone-reseau [nom]="r.nom" class="h-6 w-6 text-white" [attr.title]="r.libelle" />
+              }
+            }
+          </div>
           @if (apercu().mentionEdition) {
             <p class="mt-4 border-t border-white/10 pt-3 text-xs text-white/50">{{ apercu().mentionEdition }}</p>
           }
@@ -101,6 +150,11 @@
           <div><dt class="text-xs font-bold uppercase text-marine/60">Ville</dt><dd class="mt-1">{{ p.ville || '—' }}</dd></div>
           <div><dt class="text-xs font-bold uppercase text-marine/60">Mention d'édition</dt><dd class="mt-1">{{ p.mentionEdition || '—' }}</dd></div>
           <div class="sm:col-span-2"><dt class="text-xs font-bold uppercase text-marine/60">Slogan</dt><dd class="mt-1">{{ p.slogan || '—' }}</dd></div>
+          @for (r of reseaux; track r.nom) {
+            <div><dt class="text-xs font-bold uppercase text-marine/60">{{ r.libelle }}</dt><dd class="mt-1 break-all">{{ lienEnregistre(p, r.champ) || '—' }}</dd></div>
+          }
+          <div><dt class="text-xs font-bold uppercase text-marine/60">Mentions légales</dt><dd class="mt-1">{{ p.mentionsLegales ? 'Rédigées' : '—' }}</dd></div>
+          <div><dt class="text-xs font-bold uppercase text-marine/60">Politique de confidentialité</dt><dd class="mt-1">{{ p.politiqueConfidentialite ? 'Rédigée' : '—' }}</dd></div>
         </dl>
         @if (p.dateMiseAJour) {
           <p class="mt-6 text-xs text-marine/50">Dernière modification : {{ p.dateMiseAJour | date: 'd MMMM y à HH:mm' }}</p>

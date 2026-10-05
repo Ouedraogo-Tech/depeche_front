@@ -5,7 +5,8 @@ import { catchError, of } from 'rxjs';
 
 import { CategorieService } from '../../../../core/api/categorie.service';
 import { ParametreService } from '../../../../core/api/parametre.service';
-import { ParametreSite } from '../../../../core/models/parametre-site.model';
+import { ParametreSite, RESEAUX_SOCIAUX } from '../../../../core/models/parametre-site.model';
+import { IconeReseau } from '../../../../shared/ui/icone-reseau/icone-reseau';
 
 // Valeurs de secours : affichées pendant le chargement, ou si le backend ne répond pas
 const PARAMETRES_PAR_DEFAUT: ParametreSite = {
@@ -21,11 +22,18 @@ const PARAMETRES_PAR_DEFAUT: ParametreSite = {
 // Pied de page du site public : logo, navigation, rubriques, contact
 @Component({
   selector: 'app-footer',
-  imports: [RouterLink],
+  imports: [RouterLink, IconeReseau],
   templateUrl: './footer.html',
   styleUrl: './footer.css',
 })
 export class Footer {
+  // Les réseaux renseignés par le webmaster (Paramètres du site) : un logo cliquable chacun
+  protected readonly reseaux = RESEAUX_SOCIAUX;
+
+  protected lien(champ: keyof ParametreSite): string | null {
+    return (this.parametres()[champ] as string | null | undefined) ?? null;
+  }
+
   // GET /api/parametres (public) : modifiés par le webmaster
   protected readonly parametres = toSignal(
     inject(ParametreService).obtenir().pipe(catchError(() => of(PARAMETRES_PAR_DEFAUT))),

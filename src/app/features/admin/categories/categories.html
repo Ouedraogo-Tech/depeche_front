@@ -1,11 +1,4 @@
 <h1 class="font-serif text-2xl font-bold sm:text-3xl">Catégories</h1>
-<p class="mt-1 text-sm text-marine/70">
-  @if (modifiable()) {
-    Rubriques du site : créez-les, renommez-les ou supprimez celles qui ne servent plus.
-  } @else {
-    Rubriques du site · lecture seule : elles sont créées et modifiées par le responsable éditorial.
-  }
-</p>
 
 @if (erreur()) {
   <p class="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>

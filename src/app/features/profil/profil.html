@@ -13,10 +13,7 @@
 
     <div class="text-center sm:text-left">
       <p class="font-serif text-xl font-bold">{{ u.prenom }} {{ u.nom }}</p>
-      <p class="text-sm text-marine/70">
-        {{ u.email }} · {{ libellesRoles[u.roles[0]] }}
-        @if (u.dateInscription) { · membre depuis le {{ u.dateInscription | date: 'd MMMM y' }} }
-      </p>
+      <p class="break-all text-sm text-marine/70">{{ u.email }}</p>
 
       <div class="mt-4 flex flex-col gap-2 sm:flex-row">
         <!-- Le <label> ouvre le sélecteur de fichier (ordinateur) ou galerie / appareil photo (téléphone) -->
@@ -33,7 +30,6 @@
           </button>
         }
       </div>
-      <p class="mt-2 text-xs text-marine/50">JPG, PNG ou WEBP · 5 Mo maximum</p>
     </div>
   </div>
 

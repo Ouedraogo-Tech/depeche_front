@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -8,7 +7,7 @@ import { MediaService } from '../../core/api/media.service';
 import { UtilisateurService } from '../../core/api/utilisateur.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { ApiError } from '../../core/models/api-error.model';
-import { LIBELLES_ROLES, Utilisateur, UtilisateurModification } from '../../core/models/utilisateur.model';
+import { Utilisateur, UtilisateurModification } from '../../core/models/utilisateur.model';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { Panel } from '../../shared/ui/panel/panel';
 import { Spinner } from '../../shared/ui/spinner/spinner';
@@ -20,7 +19,7 @@ const TAILLE_MAX = 5 * 1024 * 1024; // 5 Mo
 // "Mon profil" : photo + informations (tous les espaces)
 @Component({
   selector: 'app-profil',
-  imports: [DatePipe, ReactiveFormsModule, Panel, Avatar, Spinner],
+  imports: [ReactiveFormsModule, Panel, Avatar, Spinner],
   templateUrl: './profil.html',
   styleUrl: './profil.css',
 })
@@ -30,7 +29,6 @@ export class Profil {
   private readonly mediaService = inject(MediaService);
   private readonly authService = inject(AuthService);
 
-  protected readonly libellesRoles = LIBELLES_ROLES;
   protected readonly utilisateur = signal<Utilisateur | null | undefined>(undefined);
   protected readonly enCours = signal(false);
   protected readonly photoEnCours = signal(false);

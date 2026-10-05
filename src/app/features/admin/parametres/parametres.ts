@@ -6,7 +6,8 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 
 import { ParametreService } from '../../../core/api/parametre.service';
 import { ApiError } from '../../../core/models/api-error.model';
-import { ParametreSite } from '../../../core/models/parametre-site.model';
+import { ParametreSite, RESEAUX_SOCIAUX } from '../../../core/models/parametre-site.model';
+import { IconeReseau } from '../../../shared/ui/icone-reseau/icone-reseau';
 import { Panel } from '../../../shared/ui/panel/panel';
 import { Spinner } from '../../../shared/ui/spinner/spinner';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
@@ -16,7 +17,7 @@ import { ToastService } from '../../../shared/ui/toast/toast.service';
 //  - Webmaster : modification + aperçu du footer (/webmaster/parametres, data: { modifiable: true })
 @Component({
   selector: 'app-admin-parametres',
-  imports: [DatePipe, ReactiveFormsModule, Panel, Spinner],
+  imports: [DatePipe, ReactiveFormsModule, Panel, Spinner, IconeReseau],
   templateUrl: './parametres.html',
   styleUrl: './parametres.css',
 })
@@ -33,6 +34,9 @@ export class AdminParametres {
   protected readonly erreur = signal<string | null>(null);
   private readonly toast = inject(ToastService); // messages de succès en bas de l'écran
 
+  // Les réseaux sociaux (Facebook, YouTube, WhatsApp, Instagram, LinkedIn) : un champ chacun
+  protected readonly reseaux = RESEAUX_SOCIAUX;
+
   // Mêmes règles que ParametreSiteDTO.java
   protected readonly formulaire = this.fb.group({
     nomSite: ['', [Validators.required, Validators.maxLength(100)]],
@@ -42,6 +46,15 @@ export class AdminParametres {
     adresse: [''],
     ville: [''],
     mentionEdition: [''],
+    // Liens des réseaux sociaux : vides, ou commençant par https://
+    lienFacebook: ['', [Validators.maxLength(255), Validators.pattern(/^$|^https:\/\/.+/)]],
+    lienYoutube: ['', [Validators.maxLength(255), Validators.pattern(/^$|^https:\/\/.+/)]],
+    lienWhatsapp: ['', [Validators.maxLength(255), Validators.pattern(/^$|^https:\/\/.+/)]],
+    lienInstagram: ['', [Validators.maxLength(255), Validators.pattern(/^$|^https:\/\/.+/)]],
+    lienLinkedin: ['', [Validators.maxLength(255), Validators.pattern(/^$|^https:\/\/.+/)]],
+    // Pages légales
+    mentionsLegales: ['', Validators.maxLength(30000)],
+    politiqueConfidentialite: ['', Validators.maxLength(30000)],
   });
 
   // Les valeurs du formulaire en direct, pour l'aperçu du footer
@@ -70,6 +83,13 @@ export class AdminParametres {
       adresse: vide(v.adresse),
       ville: vide(v.ville),
       mentionEdition: vide(v.mentionEdition),
+      lienFacebook: vide(v.lienFacebook),
+      lienYoutube: vide(v.lienYoutube),
+      lienWhatsapp: vide(v.lienWhatsapp),
+      lienInstagram: vide(v.lienInstagram),
+      lienLinkedin: vide(v.lienLinkedin),
+      mentionsLegales: vide(v.mentionsLegales),
+      politiqueConfidentialite: vide(v.politiqueConfidentialite),
     };
 
     this.enCours.set(true);
@@ -111,6 +131,23 @@ export class AdminParametres {
       adresse: p.adresse ?? '',
       ville: p.ville ?? '',
       mentionEdition: p.mentionEdition ?? '',
+      lienFacebook: p.lienFacebook ?? '',
+      lienYoutube: p.lienYoutube ?? '',
+      lienWhatsapp: p.lienWhatsapp ?? '',
+      lienInstagram: p.lienInstagram ?? '',
+      lienLinkedin: p.lienLinkedin ?? '',
+      mentionsLegales: p.mentionsLegales ?? '',
+      politiqueConfidentialite: p.politiqueConfidentialite ?? '',
     });
+  }
+
+  // Valeur d'un réseau dans l'aperçu (le formulaire tapé en direct)
+  protected lienApercu(champ: keyof ParametreSite): string {
+    return ((this.apercu() as Record<string, unknown>)[champ] as string | undefined) ?? '';
+  }
+
+  // Valeur enregistrée d'un réseau (affichage lecture seule de l'admin)
+  protected lienEnregistre(p: ParametreSite, champ: keyof ParametreSite): string | null {
+    return (p[champ] as string | null | undefined) ?? null;
   }
 }

@@ -35,7 +35,7 @@ export class ArticleForm {
 
   // Mêmes règles que ArticleRequestDTO.java
   protected readonly formulaire = this.fb.group({
-    titre: ['', [Validators.required, Validators.maxLength(90)]],
+    titre: ['', [Validators.required, Validators.maxLength(150)]],
     resume: ['', Validators.maxLength(300)],
     contenu: ['', Validators.required],
     categorieId: this.fb.control<number | null>(null, Validators.required),

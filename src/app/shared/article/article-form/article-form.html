@@ -1,29 +1,30 @@
 <form [formGroup]="formulaire" class="space-y-5">
 
-  <!-- Titre (90 caractères maximum, comme la maquette) -->
+  <!-- Titre (150 caractères maximum) -->
   <div>
     <div class="mb-1 flex items-baseline justify-between">
       <label for="titre" class="text-xs font-bold uppercase tracking-wide text-marine/70">Titre</label>
-      <span class="text-xs text-marine/50">{{ formulaire.controls.titre.value.length }}/90</span>
+      <span class="text-xs text-marine/50">{{ formulaire.controls.titre.value.length }}/150</span>
     </div>
     <input
       id="titre"
       formControlName="titre"
-      placeholder="Titre de l'article — 90 caractères maximum"
+      maxlength="150"
+      placeholder="Titre de l'article"
       class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
     />
     @if (aUneErreur('titre')) {
-      <p class="mt-1 text-xs text-brique">Le titre est obligatoire (90 caractères maximum).</p>
+      <p class="mt-1 text-xs text-brique">Le titre est obligatoire (150 caractères maximum).</p>
     }
   </div>
 
-  <!-- Résumé (chapeau affiché sur la page d'accueil) -->
+  <!-- Résumé : quelques lignes affichées sur la page d'accueil -->
   <div>
     <label for="resume" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Résumé</label>
     <input
       id="resume"
       formControlName="resume"
-      placeholder="Chapeau affiché sur la page d'accueil"
+      placeholder="Résumé de l'article"
       class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
     />
     @if (aUneErreur('resume')) {
@@ -85,8 +86,6 @@
     />
     @if (aUneErreur('lienVideo')) {
       <p class="mt-1 text-xs text-brique">Collez un lien YouTube valide (youtube.com/watch?v=…, youtu.be/… ou youtube.com/shorts/…).</p>
-    } @else {
-      <p class="mt-1 text-xs text-marine/50">Publiez d'abord la vidéo sur YouTube, puis collez ici son lien.</p>
     }
 
     <!-- Aperçu : la miniature de la vidéo, pour vérifier que c'est la bonne -->

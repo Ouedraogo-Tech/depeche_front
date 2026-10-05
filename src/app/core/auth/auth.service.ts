@@ -54,6 +54,17 @@ export class AuthService {
       .pipe(switchMap(() => this.connecter({ email: donnees.email, motDePasse: donnees.motDePasse })));
   }
 
+  // POST /api/auth/mot-de-passe-oublie : envoie un lien par e-mail (lecteurs et administrateurs seulement).
+  // Le backend répond toujours la même chose, que le compte existe ou non.
+  demanderReinitialisation(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/mot-de-passe-oublie`, { email });
+  }
+
+  // POST /api/auth/reinitialiser-mot-de-passe : le jeton reçu par e-mail + le nouveau mot de passe
+  reinitialiserMotDePasse(jeton: string, motDePasse: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/auth/reinitialiser-mot-de-passe`, { jeton, motDePasse });
+  }
+
   // Déconnexion : on jette le token. L'équipe retourne à /connexion, un lecteur reste sur le site ('/')
   deconnecter(destination = '/connexion'): void {
     this.tokenService.supprimer();

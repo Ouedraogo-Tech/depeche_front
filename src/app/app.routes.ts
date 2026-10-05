@@ -15,6 +15,18 @@ export const routes: Routes = [
     title: 'Connexion',
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
+  // Mot de passe oublié (lecteurs et administrateurs) : pages seules, comme la connexion
+  {
+    path: 'mot-de-passe-oublie',
+    title: 'Mot de passe oublié',
+    loadComponent: () => import('./features/auth/mot-de-passe-oublie/mot-de-passe-oublie').then((m) => m.MotDePasseOublie),
+  },
+  {
+    path: 'reinitialiser-mot-de-passe', // lien reçu par e-mail : ?jeton=…
+    title: 'Nouveau mot de passe',
+    loadComponent: () =>
+      import('./features/auth/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe').then((m) => m.ReinitialiserMotDePasse),
+  },
 
   // ===== Site public : http://localhost:4200/ (ouvert à tous) =====
   {
@@ -40,6 +52,19 @@ export const routes: Routes = [
         path: 'a-propos',
         title: 'À propos',
         loadComponent: () => import('./features/public/a-propos/a-propos').then((m) => m.APropos),
+      },
+      {
+        // Pages légales : textes rédigés par le webmaster (Paramètres du site)
+        path: 'mentions-legales',
+        title: 'Mentions légales',
+        data: { type: 'mentions' },
+        loadComponent: () => import('./features/public/page-legale/page-legale').then((m) => m.PageLegale),
+      },
+      {
+        path: 'confidentialite',
+        title: 'Politique de confidentialité',
+        data: { type: 'confidentialite' },
+        loadComponent: () => import('./features/public/page-legale/page-legale').then((m) => m.PageLegale),
       },
       {
         // Lien "Se désabonner" des e-mails de la newsletter : /newsletter/desabonnement?jeton=…

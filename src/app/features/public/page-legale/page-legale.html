@@ -1,0 +1,28 @@
+<div class="mx-auto max-w-3xl">
+  <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-brique">Informations légales</p>
+  <h1 class="mt-1 font-serif text-3xl font-bold sm:text-4xl">{{ titre() }}</h1>
+
+  @if (parametres() === undefined) {
+    <app-spinner />
+  } @else {
+    <article class="mt-6 rounded-xl border border-ligne bg-white p-5 sm:p-8">
+      @if (texte(); as contenu) {
+        <!-- whitespace-pre-line : les retours à la ligne tapés par le webmaster sont conservés -->
+        <div class="whitespace-pre-line break-words leading-relaxed">{{ contenu }}</div>
+        @if (parametres()?.dateMiseAJour; as date) {
+          <p class="mt-8 border-t border-ligne pt-4 text-xs text-marine/50">Dernière mise à jour : {{ date | date: 'd MMMM y' }}</p>
+        }
+      } @else {
+        <p class="text-sm text-marine/60">Cette page est en cours de rédaction. Pour toute question, contactez la rédaction.</p>
+      }
+    </article>
+
+    <p class="mt-6 text-sm">
+      <a routerLink="/a-propos" class="font-semibold text-brique hover:underline">Contacter la rédaction</a>
+      ·
+      <a [routerLink]="type() === 'mentions' ? '/confidentialite' : '/mentions-legales'" class="font-semibold text-brique hover:underline">
+        {{ type() === 'mentions' ? 'Politique de confidentialité' : 'Mentions légales' }}
+      </a>
+    </p>
+  }
+</div>

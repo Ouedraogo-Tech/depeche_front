@@ -40,6 +40,8 @@
         @if (formulaire.controls.motDePasse.touched && formulaire.controls.motDePasse.invalid) {
           <p class="mt-1 text-xs text-brique">Le mot de passe est obligatoire.</p>
         }
+        <!-- Mot de passe oublié (lecteurs et administrateurs) -->
+        <a routerLink="/mot-de-passe-oublie" class="mt-2 inline-block text-xs font-semibold text-brique hover:underline">Mot de passe oublié ?</a>
       </div>
 
       <!-- Message d'erreur du backend -->
