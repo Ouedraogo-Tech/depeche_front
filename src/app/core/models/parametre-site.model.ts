@@ -16,6 +16,10 @@ export interface ParametreSite {
   // Pages légales : /mentions-legales et /confidentialite
   mentionsLegales?: string | null;
   politiqueConfidentialite?: string | null;
+  // Logos envoyés par le webmaster ("/uploads/…") ; null = logo d'origine du site
+  logo?: string | null; // fond clair (en-tête)
+  logoBlanc?: string | null; // fond sombre (espaces de travail)
+  logoComplet?: string | null; // avec le slogan (pages de connexion)
   dateMiseAJour?: string | null; // rempli par le serveur, inutile à l'envoi
 }
 

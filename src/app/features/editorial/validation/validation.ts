@@ -59,6 +59,11 @@ export class Validation {
     this.selectionId.set(null);
   }
 
+  // Le journaliste a demandé une date de publication encore à venir ? (validé → planifié à cette date)
+  protected dateAVenir(date: string | null | undefined): boolean {
+    return !!date && new Date(date) > new Date();
+  }
+
   // Les 3 boutons de décision
   protected decider(decision: Decision): void {
     const article = this.selection();

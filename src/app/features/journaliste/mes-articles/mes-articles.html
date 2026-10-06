@@ -54,13 +54,17 @@
             {{ a.categorieNom }} ·
             @if (a.statut === 'PLANIFIE') {
               <span class="font-semibold text-blue-800">publication prévue le {{ a.datePublication | date: 'd MMM y à HH:mm' }}</span>
+            } @else if (a.statut === 'SOUMIS' && a.datePublicationSouhaitee) {
+              <span class="font-semibold text-blue-800">publication souhaitée le {{ a.datePublicationSouhaitee | date: 'd MMM y à HH:mm' }}</span>
             } @else {
               {{ a.datePublication ? 'publié le' : 'créé le' }} {{ a.dateReference | date: 'd MMM y' }}
             }
           </p>
-          <!-- Retour du responsable éditorial -->
+          <!-- Retour du responsable éditorial (visible seulement dans la rédaction, jamais sur le site public) -->
           @if (a.commentaireEditorial && (a.statut === 'A_REVISER' || a.statut === 'REFUSE')) {
             <p class="mt-2 rounded-md bg-red-50 px-2.5 py-1.5 text-xs text-red-800">Retour : {{ a.commentaireEditorial }}</p>
+          } @else if (a.commentaireEditorial && (a.statut === 'PUBLIE' || a.statut === 'PLANIFIE')) {
+            <p class="mt-2 rounded-md bg-green-50 px-2.5 py-1.5 text-xs text-green-800">Retour : {{ a.commentaireEditorial }}</p>
           }
         </div>
 
@@ -70,8 +74,8 @@
             <a [routerLink]="[espace, 'articles', a.id, 'modifier']" class="text-xs font-bold uppercase text-marine hover:underline">Modifier</a>
             <button type="button" (click)="aSupprimer.set(a)" class="text-xs font-bold uppercase text-brique/70 hover:text-brique hover:underline">Supprimer</button>
           }
-          @if (boutonSoumettre() && (a.statut === 'BROUILLON' || a.statut === 'A_REVISER')) {
-            <button type="button" (click)="soumettre(a)" class="text-xs font-bold uppercase text-brique hover:underline">Soumettre</button>
+          @if (boutonSoumettre() && statutsSoumettables.includes(a.statut)) {
+            <button type="button" (click)="ouvrirSoumission(a)" class="text-xs font-bold uppercase text-brique hover:underline">Soumettre</button>
           }
           @if (statutsPubliables.includes(a.statut)) {
             <button type="button" (click)="publier(a)" class="text-xs font-bold uppercase text-marine hover:underline">Publier</button>
@@ -99,7 +103,7 @@
   </ul>
 }
 
-<!-- ===== Fenêtre "Planifier la publication" ===== -->
+<!-- ===== Fenêtre "Planifier la publication" / "Soumettre pour validation" ===== -->
 @if (aPlanifier(); as a) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-marine/50 p-4" (click)="aPlanifier.set(null)">
     <form
@@ -107,30 +111,49 @@
       role="dialog"
       aria-modal="true"
       (click)="$event.stopPropagation()"
-      (submit)="$event.preventDefault(); planifier()"
+      (submit)="$event.preventDefault(); validerFenetre()"
     >
-      <h2 class="font-serif text-xl font-bold">Planifier la publication</h2>
-      <p class="mt-1 text-sm text-marine/70">« {{ a.titre }} » sera publié automatiquement à cette date.</p>
+      @if (modeFenetre() === 'planifier') {
+        <h2 class="font-serif text-xl font-bold">Planifier la publication</h2>
+        <p class="mt-1 text-sm text-marine/70">« {{ a.titre }} » sera publié automatiquement à cette date.</p>
+      } @else {
+        <h2 class="font-serif text-xl font-bold">Soumettre pour validation</h2>
+        <p class="mt-1 text-sm text-marine/70">« {{ a.titre }} » sera envoyé au responsable éditorial.</p>
+      }
 
-      <label for="date-planifiee" class="mb-1 mt-5 block text-xs font-bold uppercase tracking-wide text-marine/70">Date et heure</label>
+      <label for="date-planifiee" class="mb-1 mt-5 block text-xs font-bold uppercase tracking-wide text-marine/70">
+        {{ modeFenetre() === 'planifier' ? 'Date et heure' : 'Date de publication souhaitée (facultatif)' }}
+      </label>
       <input
         id="date-planifiee"
         type="datetime-local"
-        required
+        [required]="modeFenetre() === 'planifier'"
         [min]="dateMinimum()"
         [value]="datePlanifiee()"
         (input)="datePlanifiee.set($any($event.target).value)"
         class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
       />
-      <p class="mt-2 text-xs text-marine/50">La publication se fait dans la minute qui suit l'heure choisie.</p>
+      <p class="mt-2 text-xs text-marine/50">
+        @if (modeFenetre() === 'planifier') {
+          La publication se fait dans la minute qui suit l'heure choisie.
+        } @else {
+          Sans date, l'article est publié dès sa validation. Avec une date, il attend cette heure, même s'il est validé avant.
+        }
+      </p>
 
       <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <button type="button" (click)="aPlanifier.set(null)" class="rounded-md border border-marine px-4 py-2 text-xs font-bold uppercase text-marine">
           Annuler
         </button>
-        <button type="submit" class="rounded-md bg-blue-800 px-4 py-2 text-xs font-bold uppercase text-white hover:bg-blue-900">
-          Planifier
-        </button>
+        @if (modeFenetre() === 'planifier') {
+          <button type="submit" class="rounded-md bg-blue-800 px-4 py-2 text-xs font-bold uppercase text-white hover:bg-blue-900">
+            Planifier
+          </button>
+        } @else {
+          <button type="submit" class="rounded-md bg-brique px-4 py-2 text-xs font-bold uppercase text-white hover:opacity-90">
+            Soumettre
+          </button>
+        }
       </div>
     </form>
   </div>

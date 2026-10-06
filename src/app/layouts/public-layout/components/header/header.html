@@ -4,7 +4,11 @@
 
     <!-- Logo (sans le slogan, illisible à cette taille) -->
     <a routerLink="/" class="shrink-0">
-      <img src="images/logo/logo.png" alt="Dépêche 226" width="568" height="96" class="h-8 w-auto sm:h-10" />
+      @if (logos(); as l) {
+        <img [src]="l.normal" alt="Dépêche 226" class="h-8 w-auto sm:h-10" />
+      } @else {
+        <span class="block h-8 w-40 sm:h-10"></span>
+      }
     </a>
 
     <!-- Recherche + Compte + bouton ☰ -->
@@ -67,9 +71,10 @@
 
   <!-- ===== LIGNE 2 : la barre rouge des rubriques =====
        Tous les liens sont rouges ; la page ouverte est simplement soulignée en blanc.
-       Hauteur de la barre : py-4 (téléphone / tablette), lg:py-5 (ordinateur). -->
+       Pas de défilement : sur ordinateur, les rubriques passent à la ligne DANS la barre (tout reste visible) ;
+       sur téléphone, seuls Accueil et À propos y sont, les rubriques sont dans le menu ☰. -->
   <nav class="bg-brique text-white" aria-label="Rubriques">
-    <div class="mx-auto flex max-w-7xl items-stretch px-0 sm:px-6 lg:px-10">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-stretch justify-between px-0 sm:px-6 md:justify-center lg:px-10">
 
       <!-- Accueil (souligné quand on est sur l'accueil sans filtre) -->
       <a
@@ -79,35 +84,40 @@
         class="flex shrink-0 items-center px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
       >Accueil</a>
 
-      <!-- Actualités ▾ : menu déroulant de TOUTES les rubriques (ordinateur ; hors de la zone qui défile, sinon il serait coupé) -->
-      <div class="group relative hidden shrink-0 md:block">
-        <button type="button" class="flex h-full items-center gap-1 px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5">
-          Actualités <span class="text-xs">▾</span>
+      <!-- Actualités ▾ : menu déroulant de TOUTES les rubriques (ordinateur) -->
+      <div #menuActualites class="relative hidden shrink-0 md:block">
+        <button
+          type="button"
+          (click)="actualitesOuvert.set(!actualitesOuvert())"
+          [attr.aria-expanded]="actualitesOuvert()"
+          class="flex h-full items-center gap-1 px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
+        >
+          Actualités <span class="inline-block text-xs transition-transform" [class.rotate-180]="actualitesOuvert()">▾</span>
         </button>
-        <div class="invisible absolute left-0 top-full z-40 pt-1 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-          <div class="w-56 rounded-b-lg border border-ligne bg-white py-2 text-marine shadow-lg">
-            <a routerLink="/" class="block px-4 py-2 text-sm font-semibold hover:bg-creme">Toutes les actualités</a>
-            @for (r of rubriques(); track r.id) {
-              <a routerLink="/" [queryParams]="{ rubrique: r.id }" class="block px-4 py-2 text-sm hover:bg-creme">{{ r.nom }}</a>
-            }
+        @if (actualitesOuvert()) {
+          <div class="absolute left-0 top-full z-40 pt-1">
+            <div class="w-56 rounded-b-lg border border-ligne bg-white py-2 text-marine shadow-lg">
+              <a routerLink="/" (click)="actualitesOuvert.set(false)" class="block px-4 py-2 text-sm font-semibold hover:bg-creme">Toutes les actualités</a>
+              @for (r of rubriques(); track r.id) {
+                <a routerLink="/" [queryParams]="{ rubrique: r.id }" (click)="actualitesOuvert.set(false)" class="block px-4 py-2 text-sm hover:bg-creme">{{ r.nom }}</a>
+              }
+            </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Les rubriques à l'horizontale : défilent du doigt si elles ne tiennent pas (téléphone, ou beaucoup de rubriques) -->
-      <div class="flex min-w-0 flex-1 overflow-x-auto">
-        @for (r of rubriques(); track r.id) {
-          <a
-            routerLink="/"
-            [queryParams]="{ rubrique: r.id }"
-            routerLinkActive="underline decoration-2 underline-offset-8"
-            [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }"
-            class="flex shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
-          >{{ r.nom }}</a>
         }
       </div>
 
-      <!-- À propos : collé à droite -->
+      <!-- Les rubriques (ordinateur / tablette) : à la suite, elles passent à la ligne si elles ne tiennent pas -->
+      @for (r of rubriques(); track r.id) {
+        <a
+          routerLink="/"
+          [queryParams]="{ rubrique: r.id }"
+          routerLinkActive="underline decoration-2 underline-offset-8"
+          [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }"
+          class="hidden shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 md:flex lg:py-5"
+        >{{ r.nom }}</a>
+      }
+
+      <!-- À propos : à droite sur téléphone, à la suite des rubriques sur ordinateur -->
       <a
         routerLink="/a-propos"
         routerLinkActive="underline decoration-2 underline-offset-8"
@@ -142,11 +152,25 @@
     </div>
   }
 
-  <!-- ===== Menu ☰ (téléphone) : le compte (les rubriques sont déjà dans la barre rouge) ===== -->
+  <!-- ===== Menu ☰ (téléphone) : les rubriques (absentes de la barre rouge sur téléphone) + le compte ===== -->
   @if (menuOuvert()) {
     <nav class="flex flex-col gap-1 border-b border-ligne px-4 pb-4 pt-2 text-sm font-semibold uppercase tracking-wide md:hidden">
       <a routerLink="/" (click)="menuOuvert.set(false)" class="rounded-md px-3 py-2.5 hover:bg-white">Accueil</a>
       <a routerLink="/a-propos" (click)="menuOuvert.set(false)" class="rounded-md px-3 py-2.5 hover:bg-white">À propos</a>
+
+      @if (rubriques().length) {
+        <p class="mt-2 px-3 text-xs text-marine/60">Rubriques</p>
+        <div class="grid grid-cols-2 gap-1">
+          @for (r of rubriques(); track r.id) {
+            <a
+              routerLink="/"
+              [queryParams]="{ rubrique: r.id }"
+              (click)="menuOuvert.set(false)"
+              class="truncate rounded-md px-3 py-2.5 hover:bg-white"
+            >{{ r.nom }}</a>
+          }
+        </div>
+      }
 
       @if (utilisateur(); as u) {
         <p class="mt-2 px-3 normal-case tracking-normal text-marine/70">Connecté : {{ u.prenom }} {{ u.nom }}</p>

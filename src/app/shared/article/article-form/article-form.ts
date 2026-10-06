@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, output } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -6,6 +6,16 @@ import { Article, ArticleRequest } from '../../../core/models/article.model';
 import { Categorie } from '../../../core/models/categorie.model';
 import { ImageUpload } from '../image-upload/image-upload';
 import { MOTIF_LIEN_YOUTUBE, miniatureYoutube } from '../youtube';
+
+// Ce que renvoie le bouton "Soumettre" : l'article + la date de publication souhaitée (facultative)
+export interface SoumissionArticle {
+  article: ArticleRequest;
+  dateSouhaitee: string | null; // "2026-10-06T16:00:00", ou null = publié dès la validation
+}
+
+// Date au format du champ <input type="datetime-local"> : "2026-10-05T08:00" (heure locale)
+const versChampDate = (d: Date) =>
+  new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 
 // Formulaire d'article (journaliste ET responsable éditorial) : création OU modification.
 // Il n'appelle PAS le backend : il prévient la page parente avec output().
@@ -28,7 +38,7 @@ export class ArticleForm {
 
   // Ce que le formulaire renvoie à la page parente (un output par bouton)
   brouillon = output<ArticleRequest>(); // "Enregistrer comme brouillon" / "Enregistrer les modifications"
-  soumission = output<ArticleRequest>(); // "Soumettre pour validation"
+  soumission = output<SoumissionArticle>(); // "Soumettre pour validation" (+ date souhaitée)
   publication = output<ArticleRequest>(); // "Publier l'article"
 
   protected readonly modeModification = computed(() => this.article() !== null);
@@ -36,12 +46,17 @@ export class ArticleForm {
   // Mêmes règles que ArticleRequestDTO.java
   protected readonly formulaire = this.fb.group({
     titre: ['', [Validators.required, Validators.maxLength(150)]],
-    resume: ['', Validators.maxLength(300)],
+    resume: ['', Validators.maxLength(1000)],
     contenu: ['', Validators.required],
     categorieId: this.fb.control<number | null>(null, Validators.required),
     image: [''],
     lienVideo: ['', [Validators.maxLength(255), Validators.pattern(MOTIF_LIEN_YOUTUBE)]], // facultatif
   });
+
+  // Date de publication souhaitée : utilisée UNIQUEMENT par "Soumettre" (hors du formulaire principal)
+  protected readonly dateSouhaitee = this.fb.control('');
+  protected readonly dateMinimum = versChampDate(new Date());
+  protected readonly erreurDate = signal(false);
 
   // Aperçu de la vidéo sous le champ (miniature YouTube), dès que le lien est valide
   private readonly valeurLienVideo = toSignal(this.formulaire.controls.lienVideo.valueChanges, { initialValue: '' });
@@ -85,7 +100,12 @@ export class ArticleForm {
     if (type === 'brouillon') {
       this.brouillon.emit(article);
     } else if (type === 'soumission') {
-      this.soumission.emit(article);
+      const date = this.dateSouhaitee.value;
+      this.erreurDate.set(!!date && new Date(date) <= new Date());
+      if (this.erreurDate()) {
+        return;
+      }
+      this.soumission.emit({ article, dateSouhaitee: date ? `${date}:00` : null });
     } else {
       this.publication.emit(article);
     }
@@ -94,6 +114,8 @@ export class ArticleForm {
   // Appelée par la page parente après un enregistrement réussi
   vider(): void {
     this.formulaire.reset();
+    this.dateSouhaitee.reset();
+    this.erreurDate.set(false);
   }
 
   protected aUneErreur(champ: keyof typeof this.formulaire.controls): boolean {

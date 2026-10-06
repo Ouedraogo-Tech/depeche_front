@@ -4,6 +4,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { catchError, debounceTime, distinctUntilChanged, map, of, skip } from 'rxjs';
 
 import { CategorieService } from '../../../../core/api/categorie.service';
+import { ParametreService } from '../../../../core/api/parametre.service';
 import { AuthService } from '../../../../core/auth/auth.service';
 
 // Barre du haut du site public : logo, menu (avec les rubriques), recherche, connexion
@@ -12,6 +13,10 @@ import { AuthService } from '../../../../core/auth/auth.service';
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './header.html',
   styleUrl: './header.css',
+  host: {
+    '(document:click)': 'fermerActualitesSiDehors($event)',
+    '(document:keydown.escape)': 'actualitesOuvert.set(false)',
+  },
 })
 export class Header {
   private readonly router = inject(Router);
@@ -19,6 +24,13 @@ export class Header {
   protected readonly utilisateur = this.authService.utilisateur; // null = visiteur
 
   protected readonly menuOuvert = signal(false);
+
+  // Logo choisi par le webmaster (Paramètres), sinon le logo d'origine
+  protected readonly logos = inject(ParametreService).logos;
+
+  // Menu déroulant "Actualités ▾" : un clic l'ouvre, un 2e clic le referme
+  protected readonly actualitesOuvert = signal(false);
+  private readonly menuActualites = viewChild<ElementRef<HTMLElement>>('menuActualites');
 
   // Les rubriques du menu "Actualités" (GET /api/categories, public)
   protected readonly rubriques = toSignal(inject(CategorieService).lister().pipe(catchError(() => of([]))), {
@@ -48,6 +60,13 @@ export class Header {
         takeUntilDestroyed(),
       )
       .subscribe((mot) => this.allerAuxResultats(mot));
+  }
+
+  // Un clic ailleurs sur la page referme le menu "Actualités"
+  protected fermerActualitesSiDehors(evenement: MouseEvent): void {
+    if (!this.menuActualites()?.nativeElement.contains(evenement.target as Node)) {
+      this.actualitesOuvert.set(false);
+    }
   }
 
   protected basculerRecherche(): void {

@@ -3,6 +3,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { NotificationService } from '../../core/api/notification.service';
 import { UtilisateurService } from '../../core/api/utilisateur.service';
+import { ParametreService } from '../../core/api/parametre.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { Avatar } from '../../shared/ui/avatar/avatar';
 import { ESPACES, Espace } from './menu.config';
@@ -31,6 +32,9 @@ export class BackofficeLayout {
 
   // Menu sur téléphone : ouvert ou fermé
   protected readonly menuOuvert = signal(false);
+
+  // Logo pour fond sombre choisi par le webmaster (Paramètres), sinon le logo d'origine
+  protected readonly logos = inject(ParametreService).logos;
 
   // Badge du lien "Notifications" (nombre de non lues, partagé avec les pages)
   private readonly notificationService = inject(NotificationService);

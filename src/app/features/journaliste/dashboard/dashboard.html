@@ -18,7 +18,7 @@
 <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
   <app-stat-card [valeur]="nbPublies()" libelle="Articles publiés" [detail]="'+' + nbPubliesCeMois() + ' ce mois-ci'" />
   <app-stat-card [valeur]="nbBrouillons()" libelle="Brouillons" />
-  <app-stat-card [valeur]="nbEnAttente()" libelle="En attente" detail="Relecture du desk" [accent]="true" />
+  <app-stat-card [valeur]="nbEnAttente()" libelle="En attente" [accent]="true" />
   <app-stat-card [valeur]="nbNonLues()" libelle="Notifications" detail="Non lues" [accent]="true" />
 </div>
 

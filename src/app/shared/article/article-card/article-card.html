@@ -17,8 +17,8 @@
     <h3 class="mt-1 font-semibold leading-snug">
       <a [routerLink]="['/articles', article().id]" class="hover:underline">{{ article().titre }}</a>
     </h3>
-    <!-- Le résumé, ou à défaut le début du contenu -->
-    <p class="mt-1 text-sm text-marine/70">
+    <!-- Le résumé, ou à défaut le début du contenu (3 lignes maximum sur la carte, suivies de "…") -->
+    <p class="mt-1 line-clamp-3 text-sm text-marine/70">
       {{ article().resume || (article().contenu | slice: 0 : 110) + '…' }}
     </p>
     <!-- mt-auto : le lien reste en bas de la carte, même si les textes n'ont pas la même longueur -->

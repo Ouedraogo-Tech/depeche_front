@@ -25,8 +25,12 @@ const ONGLETS: { valeur: StatutArticle | 'TOUS'; libelle: string }[] = [
   { valeur: 'ARCHIVE', libelle: 'Archivés' },
 ];
 
-// Les statuts depuis lesquels on peut publier ou planifier
-const STATUTS_PUBLIABLES: StatutArticle[] = ['BROUILLON', 'A_REVISER', 'SOUMIS'];
+// Les statuts depuis lesquels on peut publier ou planifier soi-même.
+// PAS "SOUMIS" : en relecture, seul le responsable éditorial décide (le serveur le refuse aussi).
+const STATUTS_PUBLIABLES: StatutArticle[] = ['BROUILLON', 'A_REVISER', 'REFUSE'];
+
+// Les statuts depuis lesquels on peut (re)soumettre : un article refusé peut être corrigé puis resoumis
+const STATUTS_SOUMETTABLES: StatutArticle[] = ['BROUILLON', 'A_REVISER', 'REFUSE'];
 
 // Sans majuscules ni accents : "Économie" → "economie"
 const normaliser = (texte: string) => texte.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -46,13 +50,14 @@ export class MesArticles {
   private readonly articleService = inject(ArticleService);
 
   // false pour le responsable éditorial (route data) : il n'a pas la permission ARTICLE_SOUMETTRE
-  boutonSoumettre = input(true);
+  boutonSoumettre = input(true, { transform: (v: boolean | undefined) => v ?? true });
 
   // L'espace dans lequel la page est ouverte : "/journaliste" ou "/editorial" (pour construire les liens)
   protected readonly espace = '/' + inject(Router).url.split('/')[1];
 
   protected readonly onglets = ONGLETS;
   protected readonly statutsPubliables = STATUTS_PUBLIABLES;
+  protected readonly statutsSoumettables = STATUTS_SOUMETTABLES;
 
   // undefined = chargement
   protected readonly articles = signal<Article[] | undefined>(undefined);
@@ -67,8 +72,10 @@ export class MesArticles {
   // Archiver (article publié) : après confirmation
   protected readonly aArchiver = signal<Article | null>(null);
 
-  // Planifier : l'article choisi + la date saisie dans la fenêtre
+  // Planifier OU soumettre : l'article choisi + la date saisie dans la fenêtre
+  // ('soumettre' : la date est facultative, c'est la date de publication SOUHAITÉE)
   protected readonly aPlanifier = signal<Article | null>(null);
+  protected readonly modeFenetre = signal<'planifier' | 'soumettre'>('planifier');
   protected readonly datePlanifiee = signal('');
   protected readonly dateMinimum = signal(versChampDate(new Date()));
 
@@ -101,9 +108,31 @@ export class MesArticles {
     });
   }
 
-  // Brouillon ou À réviser → Soumis (relecture du responsable éditorial)
-  protected soumettre(article: Article): void {
-    this.changerStatut(this.articleService.soumettre(article.id), 'Soumission impossible.');
+  // Brouillon, À réviser ou Refusé → Soumis : on ouvre la fenêtre (date de publication souhaitée facultative)
+  protected ouvrirSoumission(article: Article): void {
+    this.dateMinimum.set(versChampDate(new Date()));
+    this.datePlanifiee.set('');
+    this.modeFenetre.set('soumettre');
+    this.aPlanifier.set(article);
+  }
+
+  // Bouton de la fenêtre : planifier ou soumettre selon le mode
+  protected validerFenetre(): void {
+    if (this.modeFenetre() === 'planifier') {
+      this.planifier();
+      return;
+    }
+    const article = this.aPlanifier();
+    const date = this.datePlanifiee();
+    if (!article) {
+      return;
+    }
+    if (date && new Date(date) <= new Date()) {
+      this.erreur.set('Choisissez une date et une heure dans le futur.');
+      return;
+    }
+    this.aPlanifier.set(null);
+    this.changerStatut(this.articleService.soumettre(article.id, date ? `${date}:00` : null), 'Soumission impossible.');
   }
 
   // → Publié : visible tout de suite sur le site
@@ -119,6 +148,7 @@ export class MesArticles {
     demain.setHours(8, 0, 0, 0);
     this.dateMinimum.set(versChampDate(new Date()));
     this.datePlanifiee.set(versChampDate(demain));
+    this.modeFenetre.set('planifier');
     this.aPlanifier.set(article);
   }
 

@@ -46,6 +46,35 @@
             <input id="mentionEdition" formControlName="mentionEdition" placeholder="Ex. : Édité par …" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
           </div>
 
+          <!-- ===== Logo du site : 3 versions (vide = logo d'origine) ===== -->
+          <div class="border-t border-ligne pt-4 md:col-span-2">
+            <p class="text-sm font-bold">Logo du site</p>
+          </div>
+          @for (l of versionsLogo; track l.champ) {
+            <div class="md:col-span-2">
+              <p class="mb-1 text-xs font-bold uppercase tracking-wide text-marine/70">{{ l.libelle }}</p>
+              <!-- Téléphone : aperçu puis zone d'envoi · à partir de sm : côte à côte -->
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <div class="flex h-24 shrink-0 items-center justify-center rounded-lg border border-ligne px-4 sm:w-60" [class]="l.fond">
+                  <img
+                    [src]="logoAffiche(apercu(), l.champ)"
+                    alt="Aperçu du logo"
+                    class="max-h-14 w-auto max-w-full object-contain"
+                    [class]="surPastille(apercu(), l.champ) ? 'rounded bg-white px-1.5 py-1' : ''"
+                  />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <app-image-upload [url]="null" (urlChange)="changerLogo(l.champ, $event)" />
+                  @if (formulaire.controls[l.champ].value) {
+                    <button type="button" (click)="changerLogo(l.champ, null)" class="mt-2 text-xs font-bold uppercase text-brique hover:underline">
+                      Rétablir le logo d'origine
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
           <!-- ===== Réseaux sociaux : un lien par réseau (vide = logo caché dans le footer) ===== -->
           <div class="border-t border-ligne pt-4 md:col-span-2">
             <p class="text-sm font-bold">Réseaux sociaux</p>
@@ -155,6 +184,14 @@
           }
           <div><dt class="text-xs font-bold uppercase text-marine/60">Mentions légales</dt><dd class="mt-1">{{ p.mentionsLegales ? 'Rédigées' : '—' }}</dd></div>
           <div><dt class="text-xs font-bold uppercase text-marine/60">Politique de confidentialité</dt><dd class="mt-1">{{ p.politiqueConfidentialite ? 'Rédigée' : '—' }}</dd></div>
+          @for (l of versionsLogo; track l.champ) {
+            <div>
+              <dt class="text-xs font-bold uppercase text-marine/60">{{ l.libelle }}</dt>
+              <dd class="mt-1 flex h-16 items-center justify-center rounded-lg border border-ligne px-3" [class]="l.fond">
+                <img [src]="logoAffiche(p, l.champ)" alt="Logo" class="max-h-10 w-auto max-w-full object-contain" [class]="surPastille(p, l.champ) ? 'rounded bg-white px-1.5 py-1' : ''" />
+              </dd>
+            </div>
+          }
         </dl>
         @if (p.dateMiseAJour) {
           <p class="mt-6 text-xs text-marine/50">Dernière modification : {{ p.dateMiseAJour | date: 'd MMMM y à HH:mm' }}</p>

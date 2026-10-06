@@ -7,17 +7,27 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ParametreService } from '../../../core/api/parametre.service';
 import { ApiError } from '../../../core/models/api-error.model';
 import { ParametreSite, RESEAUX_SOCIAUX } from '../../../core/models/parametre-site.model';
+import { ImageUpload } from '../../../shared/article/image-upload/image-upload';
 import { IconeReseau } from '../../../shared/ui/icone-reseau/icone-reseau';
 import { Panel } from '../../../shared/ui/panel/panel';
 import { Spinner } from '../../../shared/ui/spinner/spinner';
 import { ToastService } from '../../../shared/ui/toast/toast.service';
+
+type ChampLogo = 'logo' | 'logoBlanc' | 'logoComplet';
+
+// Les logos d'origine (dossier public/images/logo), affichés tant qu'aucun logo n'a été envoyé
+const LOGOS_ORIGINE: Record<ChampLogo, string> = {
+  logo: 'images/logo/logo.png',
+  logoBlanc: 'images/logo/logo-blanc.png',
+  logoComplet: 'images/logo/logo-complet.png',
+};
 
 // Paramètres du site (pied de page)
 //  - Admin : LECTURE SEULE (/admin/parametres)
 //  - Webmaster : modification + aperçu du footer (/webmaster/parametres, data: { modifiable: true })
 @Component({
   selector: 'app-admin-parametres',
-  imports: [DatePipe, ReactiveFormsModule, Panel, Spinner, IconeReseau],
+  imports: [DatePipe, ReactiveFormsModule, Panel, Spinner, IconeReseau, ImageUpload],
   templateUrl: './parametres.html',
   styleUrl: './parametres.css',
 })
@@ -55,7 +65,18 @@ export class AdminParametres {
     // Pages légales
     mentionsLegales: ['', Validators.maxLength(30000)],
     politiqueConfidentialite: ['', Validators.maxLength(30000)],
+    // Logos : adresse de l'image envoyée ("/uploads/…"), vide = logo d'origine
+    logo: [''],
+    logoBlanc: [''],
+    logoComplet: [''],
   });
+
+  // Les 3 versions du logo (fond = couleur derrière le logo sur le site)
+  protected readonly versionsLogo: { champ: ChampLogo; libelle: string; fond: string }[] = [
+    { champ: 'logo', libelle: 'Logo principal (en-tête du site)', fond: 'bg-creme' },
+    { champ: 'logoBlanc', libelle: 'Logo pour fond sombre (espaces de travail)', fond: 'bg-marine' },
+    { champ: 'logoComplet', libelle: 'Logo avec slogan (pages de connexion)', fond: 'bg-creme' },
+  ];
 
   // Les valeurs du formulaire en direct, pour l'aperçu du footer
   protected readonly apercu = toSignal(this.formulaire.valueChanges, { initialValue: this.formulaire.getRawValue() });
@@ -90,6 +111,9 @@ export class AdminParametres {
       lienLinkedin: vide(v.lienLinkedin),
       mentionsLegales: vide(v.mentionsLegales),
       politiqueConfidentialite: vide(v.politiqueConfidentialite),
+      logo: vide(v.logo),
+      logoBlanc: vide(v.logoBlanc),
+      logoComplet: vide(v.logoComplet),
     };
 
     this.enCours.set(true);
@@ -138,7 +162,30 @@ export class AdminParametres {
       lienLinkedin: p.lienLinkedin ?? '',
       mentionsLegales: p.mentionsLegales ?? '',
       politiqueConfidentialite: p.politiqueConfidentialite ?? '',
+      logo: p.logo ?? '',
+      logoBlanc: p.logoBlanc ?? '',
+      logoComplet: p.logoComplet ?? '',
     });
+  }
+
+  // Nouvelle image envoyée (ou null = retour au logo d'origine)
+  protected changerLogo(champ: ChampLogo, url: string | null): void {
+    const controle = this.formulaire.controls[champ];
+    controle.setValue(url ?? '');
+    controle.markAsDirty();
+  }
+
+  // Le logo réellement affiché sur le site pour cette version (mêmes règles que ParametreService.logos) :
+  // l'image envoyée, sinon le logo principal envoyé, sinon le logo d'origine
+  protected logoAffiche(valeurs: Partial<ParametreSite>, champ: ChampLogo): string {
+    const principal = valeurs.logo || null;
+    if (champ === 'logo') return principal || LOGOS_ORIGINE.logo;
+    return valeurs[champ] || principal || LOGOS_ORIGINE[champ];
+  }
+
+  // Fond sombre sans version dédiée : le logo principal est posé sur une pastille blanche
+  protected surPastille(valeurs: Partial<ParametreSite>, champ: ChampLogo): boolean {
+    return champ === 'logoBlanc' && !valeurs.logoBlanc && !!valeurs.logo;
   }
 
   // Valeur d'un réseau dans l'aperçu (le formulaire tapé en direct)

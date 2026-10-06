@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { ParametreService } from '../../../core/api/parametre.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/models/api-error.model';
 
@@ -16,6 +17,7 @@ import { ApiError } from '../../../core/models/api-error.model';
 })
 export class MotDePasseOublie {
   private readonly fb = inject(NonNullableFormBuilder);
+  protected readonly logos = inject(ParametreService).logos; // logo choisi par le webmaster (Paramètres)
   private readonly authService = inject(AuthService);
 
   protected readonly formulaire = this.fb.group({

@@ -8,7 +8,7 @@ import { ArticleService } from '../../../core/api/article.service';
 import { CategorieService } from '../../../core/api/categorie.service';
 import { ApiError } from '../../../core/models/api-error.model';
 import { Article, ArticleRequest, StatutArticle } from '../../../core/models/article.model';
-import { ArticleForm } from '../../../shared/article/article-form/article-form';
+import { ArticleForm, SoumissionArticle } from '../../../shared/article/article-form/article-form';
 import { Panel } from '../../../shared/ui/panel/panel';
 import { StatusBadge } from '../../../shared/ui/status-badge/status-badge';
 import { Spinner } from '../../../shared/ui/spinner/spinner';
@@ -31,7 +31,7 @@ export class ModifierArticle {
   id = input.required<string>(); // le "12" de l'adresse
 
   // false pour le responsable éditorial (route data) : il n'a pas la permission ARTICLE_SOUMETTRE
-  boutonSoumettre = input(true);
+  boutonSoumettre = input(true, { transform: (v: boolean | undefined) => v ?? true });
 
   // "/journaliste/mes-articles" ou "/editorial/mes-articles" selon l'espace où la page est ouverte
   protected readonly retourMesArticles = '/' + this.router.url.split('/')[1] + '/mes-articles';
@@ -66,10 +66,12 @@ export class ModifierArticle {
     this.envoyer(this.articleService.modifier(this.idArticle(), donnees));
   }
 
-  // "Enregistrer et soumettre" : PUT, PUIS soumission au responsable éditorial
-  protected enregistrerEtSoumettre(donnees: ArticleRequest): void {
+  // "Enregistrer et soumettre" : PUT, PUIS soumission au responsable éditorial (avec la date souhaitée, facultative)
+  protected enregistrerEtSoumettre({ article, dateSouhaitee }: SoumissionArticle): void {
     this.envoyer(
-      this.articleService.modifier(this.idArticle(), donnees).pipe(switchMap((a) => this.articleService.soumettre(a.id))),
+      this.articleService
+        .modifier(this.idArticle(), article)
+        .pipe(switchMap((a) => this.articleService.soumettre(a.id, dateSouhaitee))),
     );
   }
 

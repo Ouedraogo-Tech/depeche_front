@@ -16,8 +16,10 @@ export interface Article {
   contenu: string;
   image: string | null;
   lienVideo: string | null; // lien YouTube (facultatif)
+  // Infos internes à la rédaction : ABSENTES des réponses du site public (/api/articles/publies)
   statut: StatutArticle;
   commentaireEditorial: string | null;
+  datePublicationSouhaitee?: string | null; // date demandée en soumettant (article SOUMIS)
   dateCreation: string;
   datePublication: string | null;
   auteurId: number;

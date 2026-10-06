@@ -3,6 +3,7 @@ import { Component, inject, input, signal } from '@angular/core';
 import { AbstractControl, NonNullableFormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
+import { ParametreService } from '../../../core/api/parametre.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../core/models/api-error.model';
 
@@ -22,6 +23,7 @@ function motsDePasseIdentiques(groupe: AbstractControl): ValidationErrors | null
 })
 export class ReinitialiserMotDePasse {
   private readonly fb = inject(NonNullableFormBuilder);
+  protected readonly logos = inject(ParametreService).logos; // logo choisi par le webmaster (Paramètres)
   private readonly authService = inject(AuthService);
 
   // Le jeton secret de ?jeton=… (withComponentInputBinding)

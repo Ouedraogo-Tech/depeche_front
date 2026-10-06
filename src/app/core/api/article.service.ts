@@ -70,9 +70,11 @@ export class ArticleService {
 
   // ===== Changements de statut =====
 
-  // PATCH /api/articles/{id}/soumettre : BROUILLON (ou À RÉVISER) → SOUMIS (journaliste)
-  soumettre(id: number): Observable<Article> {
-    return this.http.patch<Article>(`${this.url}/${id}/soumettre`, {});
+  // PATCH /api/articles/{id}/soumettre[?date=2026-10-06T16:00:00] : BROUILLON, À RÉVISER ou REFUSÉ → SOUMIS.
+  // date = publication souhaitée (facultative), appliquée seulement si l'article est validé
+  soumettre(id: number, dateSouhaitee: string | null = null): Observable<Article> {
+    const params = dateSouhaitee ? new HttpParams().set('date', dateSouhaitee) : undefined;
+    return this.http.patch<Article>(`${this.url}/${id}/soumettre`, {}, { params });
   }
 
   // PATCH /api/articles/{id}/publier : publication directe (RE sur ce qu'il a écrit)

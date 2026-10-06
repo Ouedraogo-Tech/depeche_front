@@ -1,7 +1,11 @@
 <!-- Page seule : la carte centrée sur l'écran (même style que la connexion) -->
 <div class="flex min-h-screen flex-col items-center justify-center px-4 py-10">
   <a routerLink="/" class="mb-6">
-    <img src="images/logo/logo-complet.png" alt="Dépêche 226 — L'info qui vous éclaire" width="677" height="160" class="h-14 w-auto sm:h-16" />
+    @if (logos(); as l) {
+      <img [src]="l.complet" alt="Dépêche 226" class="h-14 w-auto sm:h-16" />
+    } @else {
+      <span class="block h-14 sm:h-16"></span>
+    }
   </a>
 
   <div class="w-full max-w-md rounded-xl border border-ligne bg-white p-6 shadow-sm sm:p-8">

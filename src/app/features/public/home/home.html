@@ -82,7 +82,7 @@
           <h2 class="mt-2 font-serif text-2xl font-bold leading-tight sm:text-3xl">
             <a [routerLink]="['/articles', une.id]" class="hover:underline">{{ une.titre }}</a>
           </h2>
-          <p class="mt-3 text-marine/80">{{ une.resume || (une.contenu | slice: 0 : 220) + '…' }}</p>
+          <p class="mt-3 line-clamp-4 text-marine/80">{{ une.resume || (une.contenu | slice: 0 : 220) + '…' }}</p>
           <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-marine/60">
             <span>Par <strong class="text-marine">{{ une.auteurNomComplet }}</strong> · {{ une.contenu | tempsLecture }}</span>
             <a [routerLink]="['/articles', une.id]" class="font-bold uppercase text-brique">Lire plus →</a>

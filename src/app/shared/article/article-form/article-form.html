@@ -20,15 +20,20 @@
 
   <!-- Résumé : quelques lignes affichées sur la page d'accueil -->
   <div>
-    <label for="resume" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Résumé</label>
-    <input
+    <div class="mb-1 flex items-baseline justify-between">
+      <label for="resume" class="text-xs font-bold uppercase tracking-wide text-marine/70">Résumé</label>
+      <span class="text-xs text-marine/50">{{ formulaire.controls.resume.value.length }}/1000</span>
+    </div>
+    <textarea
       id="resume"
       formControlName="resume"
+      rows="3"
+      maxlength="1000"
       placeholder="Résumé de l'article"
       class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
-    />
+    ></textarea>
     @if (aUneErreur('resume')) {
-      <p class="mt-1 text-xs text-brique">300 caractères maximum.</p>
+      <p class="mt-1 text-xs text-brique">1 000 caractères maximum.</p>
     }
   </div>
 
@@ -101,6 +106,25 @@
       </div>
     }
   </div>
+
+  <!-- Date de publication souhaitée : seulement pour "Soumettre pour validation" -->
+  @if (boutonSoumettre()) {
+    <div class="md:w-1/2">
+      <label for="dateSouhaitee" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">
+        Date de publication souhaitée (facultatif)
+      </label>
+      <input
+        id="dateSouhaitee"
+        type="datetime-local"
+        [formControl]="dateSouhaitee"
+        [min]="dateMinimum"
+        class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none"
+      />
+      @if (erreurDate()) {
+        <p class="mt-1 text-xs text-brique">Choisissez une date et une heure dans le futur.</p>
+      }
+    </div>
+  }
 
   <!-- Erreur du backend -->
   @if (erreur()) {

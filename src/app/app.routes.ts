@@ -285,17 +285,11 @@ export const routes: Routes = [
     ],
   },
 
-  // ===== Toute autre adresse → page 404, dans le cadre du site public =====
+  // ===== Toute autre adresse → page 404 SEULE (sans en-tête, newsletter ni pied de page) =====
   // TOUJOURS EN DERNIER : Angular teste les routes dans l'ordre, "**" attrape tout ce qui reste.
   {
     path: '**',
-    component: PublicLayout,
-    children: [
-      {
-        path: '',
-        title: 'Page introuvable',
-        loadComponent: () => import('./features/public/page-introuvable/page-introuvable').then((m) => m.PageIntrouvable),
-      },
-    ],
+    title: 'Page introuvable',
+    loadComponent: () => import('./features/public/page-introuvable/page-introuvable').then((m) => m.PageIntrouvable),
   },
 ];
