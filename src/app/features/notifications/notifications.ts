@@ -15,6 +15,7 @@ const STYLES: Record<TypeNotification, { icone: string; classes: string }> = {
   ARTICLE_REFUSE: { icone: '⚠', classes: 'border-red-200 bg-red-50' },
   ARTICLE_SOUMIS: { icone: '📝', classes: 'border-blue-200 bg-blue-50' },
   NOUVEAU_COMMENTAIRE: { icone: '💬', classes: 'border-ligne bg-white' },
+  NOUVELLE_CATEGORIE: { icone: '🏷', classes: 'border-green-200 bg-green-50' },
 };
 
 // "Notifications" : /journaliste/notifications et /editorial/notifications (GET /api/notifications)
@@ -87,6 +88,8 @@ export class Notifications {
         return n.articleId ? `/articles/${n.articleId}` : null;
       case 'NOUVEAU_COMMENTAIRE':
         return '/journaliste/commentaires';
+      case 'NOUVELLE_CATEGORIE': // la catégorie est disponible dans le formulaire : on propose d'écrire
+        return '/journaliste/nouvel-article';
       default: // à réviser, refusé : retour à "Mes articles"
         return `${this.espace}/mes-articles`;
     }

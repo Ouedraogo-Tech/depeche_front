@@ -3,7 +3,7 @@
   <!-- Barre du haut : seulement sur téléphone / tablette (cachée à partir de lg) -->
   <header class="sticky top-0 z-30 flex items-center justify-between bg-marine px-4 py-3 text-white lg:hidden">
     @if (logos(); as l) {
-      <img [src]="l.blanc" alt="Dépêche 226" class="h-7 w-auto" [class]="l.blancSurPastille ? 'rounded bg-white px-1.5 py-1' : ''" />
+      <img [src]="l.blanc" alt="Dépêche 226" class="h-7 w-auto" />
     } @else {
       <span class="block h-7"></span>
     }
@@ -28,7 +28,7 @@
     <div class="flex items-start justify-between px-2">
       <div>
         @if (logos(); as l) {
-          <img [src]="l.blanc" alt="Dépêche 226" class="h-7 w-auto" [class]="l.blancSurPastille ? 'rounded bg-white px-1.5 py-1' : ''" />
+          <img [src]="l.blanc" alt="Dépêche 226" class="h-7 w-auto" />
         } @else {
           <span class="block h-7"></span>
         }

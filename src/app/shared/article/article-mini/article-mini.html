@@ -1,5 +1,5 @@
 <!-- Toute la vignette est un seul lien cliquable -->
-<a [routerLink]="['/articles', article().id]" class="group flex gap-3 rounded-lg p-2 transition hover:bg-creme">
+<a [routerLink]="['/articles', article().slug || article().id]" class="group flex gap-3 rounded-lg p-2 transition hover:bg-creme">
   <!-- Cadre de l'image : fond sable visible si pas d'image ou image introuvable -->
   <span class="block h-16 w-24 shrink-0 overflow-hidden rounded-md bg-sable">
     @if (article().image; as image) {

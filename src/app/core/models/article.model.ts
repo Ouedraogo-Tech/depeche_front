@@ -12,6 +12,7 @@ export type StatutArticle =
 export interface Article {
   id: number;
   titre: string;
+  slug?: string | null; // adresse publique lisible : /articles/{slug}
   resume: string | null;
   contenu: string;
   image: string | null;

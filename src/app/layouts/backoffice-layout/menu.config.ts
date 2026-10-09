@@ -56,7 +56,7 @@ export const ESPACES: Partial<Record<RoleName, Espace>> = {
     titre: 'Espace webmaster',
     menu: [
       { libelle: 'Dashboard', chemin: '/webmaster/tableau-de-bord' },
-      { libelle: 'Modération', chemin: '/webmaster/moderation' },
+      { libelle: 'Commentaires', chemin: '/webmaster/moderation' },
       { libelle: 'Paramètres du site', chemin: '/webmaster/parametres' },
       { libelle: 'Newsletter', chemin: '/webmaster/newsletter' },
       { libelle: 'Profil', chemin: '/webmaster/profil' },

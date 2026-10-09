@@ -1,8 +1,8 @@
 <article class="flex h-full flex-col overflow-hidden rounded-xl border border-ligne bg-white">
   <!-- Image (ou emplacement sable si l'article n'a pas d'image) -->
-  <a [routerLink]="['/articles', article().id]" class="relative block aspect-[16/9] bg-sable">
+  <a [routerLink]="['/articles', article().slug || article().id]" class="relative block aspect-[16/9] bg-sable">
     @if (article().image; as image) {
-      <img [src]="image" [alt]="article().titre" loading="lazy" class="h-full w-full object-cover" />
+      <img appImageSecours [src]="image" [alt]="article().titre" loading="lazy" class="h-full w-full object-cover" />
     }
     <!-- Badge : l'article est accompagné d'une vidéo YouTube -->
     @if (article().lienVideo) {
@@ -15,14 +15,14 @@
       {{ article().categorieNom }} · {{ article().datePublication | date: 'd MMM' | uppercase }}
     </p>
     <h3 class="mt-1 font-semibold leading-snug">
-      <a [routerLink]="['/articles', article().id]" class="hover:underline">{{ article().titre }}</a>
+      <a [routerLink]="['/articles', article().slug || article().id]" class="hover:underline">{{ article().titre }}</a>
     </h3>
     <!-- Le résumé, ou à défaut le début du contenu (3 lignes maximum sur la carte, suivies de "…") -->
     <p class="mt-1 line-clamp-3 text-sm text-marine/70">
       {{ article().resume || (article().contenu | slice: 0 : 110) + '…' }}
     </p>
     <!-- mt-auto : le lien reste en bas de la carte, même si les textes n'ont pas la même longueur -->
-    <a [routerLink]="['/articles', article().id]" class="mt-auto pt-3 text-xs font-bold uppercase text-brique">
+    <a [routerLink]="['/articles', article().slug || article().id]" class="mt-auto pt-3 text-xs font-bold uppercase text-brique">
       Lire plus →
     </a>
   </div>

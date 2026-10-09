@@ -5,7 +5,8 @@ export type TypeNotification =
   | 'ARTICLE_A_REVISER'
   | 'ARTICLE_REFUSE'
   | 'ARTICLE_PUBLIE'
-  | 'NOUVEAU_COMMENTAIRE';
+  | 'NOUVEAU_COMMENTAIRE'
+  | 'NOUVELLE_CATEGORIE'; // journalistes : une nouvelle catégorie a été créée
 
 // Une notification reçue du backend (GET /api/notifications)
 export interface NotificationUtilisateur {

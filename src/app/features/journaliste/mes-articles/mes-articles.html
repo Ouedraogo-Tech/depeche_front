@@ -86,7 +86,7 @@
             <button type="button" (click)="annulerPlanification(a)" class="text-xs font-bold uppercase text-brique/70 hover:text-brique hover:underline">Annuler</button>
           }
           @if (a.statut === 'PUBLIE') {
-            <a [routerLink]="['/articles', a.id]" class="text-xs font-bold uppercase text-marine hover:underline">Voir sur le site ↗</a>
+            <a [routerLink]="['/articles', a.slug || a.id]" class="text-xs font-bold uppercase text-marine hover:underline">Voir sur le site ↗</a>
             <button type="button" (click)="aArchiver.set(a)" class="text-xs font-bold uppercase text-marine/60 hover:text-marine hover:underline">Archiver</button>
           }
         </div>

@@ -82,8 +82,7 @@
                 @if (erreurCommentaire()) {
                   <p class="mt-2 text-sm text-red-700">{{ erreurCommentaire() }}</p>
                 }
-                <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <span class="text-xs text-marine/50">Restez courtois : les commentaires sont modérés.</span>
+                <div class="mt-3 flex flex-col sm:flex-row sm:justify-end">
                   <button type="submit" [disabled]="envoiEnCours()" class="rounded-md bg-brique px-5 py-2.5 text-xs font-bold uppercase text-white hover:opacity-90 disabled:opacity-60">
                     {{ envoiEnCours() ? 'Publication…' : 'Publier' }}
                   </button>

@@ -112,7 +112,7 @@
                 <td class="whitespace-nowrap py-3 text-xs">
                   <!-- Seuls les articles publiés sont visibles sur le site -->
                   @if (a.statut === 'PUBLIE') {
-                    <a [routerLink]="['/articles', a.id]" target="_blank" class="font-semibold text-brique hover:underline">Voir sur le site ↗</a>
+                    <a [routerLink]="['/articles', a.slug || a.id]" target="_blank" class="font-semibold text-brique hover:underline">Voir sur le site ↗</a>
                   }
                 </td>
               </tr>

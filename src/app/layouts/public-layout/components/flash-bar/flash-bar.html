@@ -1,12 +1,12 @@
 <!-- Le bandeau n'apparaît que s'il y a au moins un article publié -->
 @if (titreCourant(); as t) {
-        <!-- mt-2 sur téléphone, mt-3 à partir de sm : un peu d'air entre la barre rouge et la flash-bar -->
-  <div class="mt-2 bg-marine-fonce text-white sm:mt-3">
+        <!-- mt-2 sur téléphone, mt-3 à partir de sm : un peu d'air entre la barre des rubriques et la flash-bar (rouge du logo) -->
+  <div class="mt-2 bg-brique text-white sm:mt-3">
     <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2.5 text-xs font-semibold sm:px-6 sm:text-sm lg:px-10">
 
       <!-- Pastille qui clignote + libellé (ne bouge pas) -->
       <span class="flex shrink-0 items-center gap-2 font-bold uppercase">
-        <span class="h-2.5 w-2.5 animate-pulse rounded-full bg-brique"></span>
+        <span class="h-2.5 w-2.5 animate-pulse rounded-full bg-white"></span>
         Flash info
       </span>
 
@@ -15,7 +15,7 @@
         <!-- Passage pair → animation "traverser-a", impair → "traverser-b" :
              changer le NOM de l'animation oblige le navigateur à la rejouer depuis le début -->
         <a
-          [routerLink]="['/articles', t.id]"
+          [routerLink]="['/articles', t.lien]"
           class="titre absolute top-0 whitespace-nowrap hover:underline"
           [class.pair]="passage() % 2 === 0"
           [class.impair]="passage() % 2 === 1"

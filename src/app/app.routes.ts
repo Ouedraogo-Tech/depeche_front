@@ -39,7 +39,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/public/home/home').then((m) => m.Home),
       },
       {
-        path: 'articles/:id',
+        // :lien = adresse lisible construite à partir du titre (/articles/aes-france-diaspora-…), sans le numéro
+        path: 'articles/:lien',
         title: 'Article', // remplacé par le titre de l'article dès qu'il est chargé
         loadComponent: () => import('./features/public/article-detail/article-detail').then((m) => m.ArticleDetail),
       },
@@ -263,7 +264,7 @@ export const routes: Routes = [
       },
       {
         path: 'moderation',
-        title: 'Modération',
+        title: 'Commentaires',
         loadComponent: () => import('./features/webmaster/moderation/moderation').then((m) => m.Moderation),
       },
       {

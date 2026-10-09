@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -71,12 +71,18 @@ export class AdminParametres {
     logoComplet: [''],
   });
 
-  // Les 3 versions du logo (fond = couleur derrière le logo sur le site)
+  // Les 3 emplacements du logo sur le site (fond = couleur derrière le logo à cet endroit)
   protected readonly versionsLogo: { champ: ChampLogo; libelle: string; fond: string }[] = [
-    { champ: 'logo', libelle: 'Logo principal (en-tête du site)', fond: 'bg-creme' },
-    { champ: 'logoBlanc', libelle: 'Logo pour fond sombre (espaces de travail)', fond: 'bg-marine' },
-    { champ: 'logoComplet', libelle: 'Logo avec slogan (pages de connexion)', fond: 'bg-creme' },
+    { champ: 'logo', libelle: 'En-tête du site public (fond clair)', fond: 'bg-creme' },
+    { champ: 'logoBlanc', libelle: 'Espaces de travail (fond bleu)', fond: 'bg-marine' },
+    { champ: 'logoComplet', libelle: 'Pages de connexion (fond clair)', fond: 'bg-creme' },
   ];
+
+  // Une seule zone d'envoi : le webmaster choisit l'emplacement, puis importe le logo préparé pour ce fond
+  protected readonly emplacementLogo = signal<ChampLogo>('logo');
+  protected readonly versionChoisie = computed(
+    () => this.versionsLogo.find((v) => v.champ === this.emplacementLogo()) ?? this.versionsLogo[0],
+  );
 
   // Les valeurs du formulaire en direct, pour l'aperçu du footer
   protected readonly apercu = toSignal(this.formulaire.valueChanges, { initialValue: this.formulaire.getRawValue() });
@@ -175,17 +181,10 @@ export class AdminParametres {
     controle.markAsDirty();
   }
 
-  // Le logo réellement affiché sur le site pour cette version (mêmes règles que ParametreService.logos) :
-  // l'image envoyée, sinon le logo principal envoyé, sinon le logo d'origine
+  // Le logo affiché à cet emplacement : l'image envoyée pour cet emplacement, sinon le logo d'origine
+  // (chaque emplacement est indépendant, comme dans ParametreService.logos)
   protected logoAffiche(valeurs: Partial<ParametreSite>, champ: ChampLogo): string {
-    const principal = valeurs.logo || null;
-    if (champ === 'logo') return principal || LOGOS_ORIGINE.logo;
-    return valeurs[champ] || principal || LOGOS_ORIGINE[champ];
-  }
-
-  // Fond sombre sans version dédiée : le logo principal est posé sur une pastille blanche
-  protected surPastille(valeurs: Partial<ParametreSite>, champ: ChampLogo): boolean {
-    return champ === 'logoBlanc' && !valeurs.logoBlanc && !!valeurs.logo;
+    return valeurs[champ] || LOGOS_ORIGINE[champ];
   }
 
   // Valeur d'un réseau dans l'aperçu (le formulaire tapé en direct)

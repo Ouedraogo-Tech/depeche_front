@@ -3,11 +3,12 @@ import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { Article } from '../../../core/models/article.model';
+import { ImageSecours } from '../../directives/image-secours.directive';
 
 // Carte d'un article (grille "Dernières actualités", pages rubrique et recherche)
 @Component({
   selector: 'app-article-card',
-  imports: [RouterLink, DatePipe, UpperCasePipe, SlicePipe],
+  imports: [RouterLink, DatePipe, UpperCasePipe, SlicePipe, ImageSecours],
   templateUrl: './article-card.html',
   styleUrl: './article-card.css',
 })

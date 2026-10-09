@@ -64,7 +64,7 @@
       <ul class="divide-y divide-ligne">
         @for (a of dernieresPublications(); track a.id) {
           <li class="py-3">
-            <a [routerLink]="['/articles', a.id]" class="font-semibold hover:text-brique">{{ a.titre }}</a>
+            <a [routerLink]="['/articles', a.slug || a.id]" class="font-semibold hover:text-brique">{{ a.titre }}</a>
             <p class="mt-0.5 text-xs text-marine/60">{{ a.auteurNomComplet }} · {{ a.datePublication | date: 'd MMM, HH:mm' }}</p>
           </li>
         } @empty {

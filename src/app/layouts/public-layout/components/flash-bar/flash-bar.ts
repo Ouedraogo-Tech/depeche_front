@@ -19,7 +19,7 @@ export class FlashBar {
     inject(ArticleService)
       .listerPublies()
       .pipe(
-        map((articles) => articles.slice(0, 5).map((a) => ({ id: a.id, titre: a.titre }))),
+        map((articles) => articles.slice(0, 5).map((a) => ({ id: a.id, lien: a.slug || a.id, titre: a.titre }))),
         catchError(() => of([])),
       ),
     { initialValue: [] },

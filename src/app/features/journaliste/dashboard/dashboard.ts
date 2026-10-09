@@ -22,6 +22,7 @@ const STYLES_NOTIFICATION: Record<TypeNotification, { icone: string; classes: st
   ARTICLE_REFUSE: { icone: '⚠', classes: 'border-red-200 bg-red-50 text-red-800' },
   ARTICLE_SOUMIS: { icone: '•', classes: 'border-ligne bg-white text-marine' },
   NOUVEAU_COMMENTAIRE: { icone: '💬', classes: 'border-ligne bg-white text-marine' },
+  NOUVELLE_CATEGORIE: { icone: '🏷', classes: 'border-green-200 bg-green-50 text-green-900' },
 };
 
 // Tableau de bord du journaliste (maquette "Espace Journaliste")

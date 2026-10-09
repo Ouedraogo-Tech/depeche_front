@@ -16,7 +16,6 @@ const LOGOS_ORIGINE = {
 export interface LogosSite {
   normal: string; // fond clair : en-tête du site public
   blanc: string; // fond sombre : barre des espaces de travail
-  blancSurPastille: boolean; // true = pas de version "fond sombre" : le logo normal est posé sur une pastille blanche
   complet: string; // avec le slogan : pages de connexion
 }
 
@@ -36,12 +35,11 @@ export class ParametreService {
     if (p === undefined) {
       return null;
     }
-    // Un seul logo envoyé ? On le réutilise partout, pour garder la même identité visuelle
+    // Chaque emplacement est indépendant : changer un logo ne touche pas les deux autres
     return {
       normal: p?.logo || LOGOS_ORIGINE.normal,
-      blanc: p?.logoBlanc || p?.logo || LOGOS_ORIGINE.blanc,
-      blancSurPastille: !p?.logoBlanc && !!p?.logo,
-      complet: p?.logoComplet || p?.logo || LOGOS_ORIGINE.complet,
+      blanc: p?.logoBlanc || LOGOS_ORIGINE.blanc,
+      complet: p?.logoComplet || LOGOS_ORIGINE.complet,
     };
   });
 

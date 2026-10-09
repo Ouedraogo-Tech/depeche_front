@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, effect, inject, input, linkedSignal, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Title } from '@angular/platform-browser';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
 
 import { ArticleService } from '../../../core/api/article.service';
@@ -14,7 +14,8 @@ import { ArticleCard } from '../../../shared/article/article-card/article-card';
 import { miniatureYoutube } from '../../../shared/article/youtube';
 import { TempsLecturePipe } from '../../../shared/pipes/temps-lecture.pipe';
 
-// Page d'un article : /articles/7 (+ commentaires + articles similaires de la même catégorie)
+// Page d'un article : /articles/aes-france-diaspora-… (+ commentaires + articles similaires de la même catégorie)
+// L'adresse ne montre plus le numéro de l'article ; un ancien lien /articles/7 est redirigé vers l'adresse lisible.
 @Component({
   selector: 'app-article-detail',
   imports: [RouterLink, DatePipe, UpperCasePipe, TempsLecturePipe, ArticleCard],
@@ -26,14 +27,15 @@ export class ArticleDetail {
   private readonly commentaireService = inject(CommentaireService);
   private readonly authService = inject(AuthService);
 
-  // Le ":id" de l'adresse /articles/:id arrive ici tout seul (withComponentInputBinding)
-  id = input.required<string>();
-  private readonly id$ = toObservable(this.id);
+  private readonly router = inject(Router);
+
+  // Le ":lien" de l'adresse /articles/:lien arrive ici tout seul (withComponentInputBinding)
+  lien = input.required<string>();
 
   // undefined = chargement · null = article introuvable (ou non publié) · sinon l'article
   protected readonly article = toSignal(
-    this.id$.pipe(
-      switchMap((id) => this.articleService.obtenirPublie(Number(id)).pipe(catchError(() => of(null)))),
+    toObservable(this.lien).pipe(
+      switchMap((lien) => this.articleService.obtenirPublie(lien).pipe(catchError(() => of(null)))),
     ),
     { initialValue: undefined },
   );
@@ -43,8 +45,8 @@ export class ArticleDetail {
 
   // Les commentaires publiés (du plus récent au plus ancien) tels que renvoyés par le backend…
   private readonly commentairesServeur = toSignal(
-    this.id$.pipe(
-      switchMap((id) => this.commentaireService.listerParArticle(Number(id)).pipe(catchError(() => of([])))),
+    toObservable(this.article).pipe(
+      switchMap((a) => (a ? this.commentaireService.listerParArticle(a.id).pipe(catchError(() => of([]))) : of([]))),
     ),
     { initialValue: [] },
   );
@@ -59,7 +61,7 @@ export class ArticleDetail {
   protected readonly erreurCommentaire = signal<string | null>(null);
 
   // L'adresse de cette page, pour y revenir après la connexion
-  protected readonly adresseArticle = computed(() => `/articles/${this.id()}`);
+  protected readonly adresseArticle = computed(() => `/articles/${this.article()?.slug || this.lien()}`);
 
   protected commenter(): void {
     const contenu = this.texteCommentaire().trim();
@@ -70,8 +72,12 @@ export class ArticleDetail {
     this.envoiEnCours.set(true);
     this.erreurCommentaire.set(null);
 
+    const article = this.article();
+    if (!article) {
+      return;
+    }
     // POST /api/commentaires?articleId=7 : publié tout de suite
-    this.commentaireService.ecrire(Number(this.id()), { contenu }).subscribe({
+    this.commentaireService.ecrire(article.id, { contenu }).subscribe({
       next: (nouveau) => {
         this.commentaires.update((liste) => [nouveau, ...liste]); // en haut de la liste
         this.texteCommentaire.set('');
@@ -91,6 +97,13 @@ export class ArticleDetail {
       const a = this.article();
       if (a) {
         title.setTitle(`${a.titre} – Dépêche 226`);
+        // Ancien lien avec le numéro (/articles/7, notification, commentaire) : on affiche l'adresse lisible.
+        // Seulement quand l'adresse est un NUMÉRO et que c'est bien CET article qui est chargé : sinon, en cliquant
+        // sur un article similaire, l'ancien article encore affiché renverrait vers lui-même.
+        const lien = this.lien();
+        if (a.slug && /^\d+$/.test(lien) && a.id === Number(lien)) {
+          this.router.navigate(['/articles', a.slug], { replaceUrl: true });
+        }
       } else if (a === null) {
         title.setTitle('Article introuvable – Dépêche 226');
       }

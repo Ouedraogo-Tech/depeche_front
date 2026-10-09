@@ -27,9 +27,9 @@
   <div>
     <label for="statut" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Statut</label>
     <select id="statut" (change)="statutFiltre.set($any($event.target).value)" class="w-full rounded-md border border-ligne bg-white px-3 py-2 text-sm">
-      <option value="TOUS" [selected]="statutFiltre() === 'TOUS'">Tous</option>
+      <option value="TOUS" [selected]="statutFiltre() === 'TOUS'">Tous (hors archivés)</option>
       @for (s of statuts; track s) {
-        <option [value]="s" [selected]="s === statutFiltre()">{{ s }}</option>
+        <option [value]="s" [selected]="s === statutFiltre()">{{ libellesStatut[s] }}</option>
       }
     </select>
   </div>
@@ -48,15 +48,24 @@
 @if (lignes(); as liste) {
   <!-- Nombre de résultats + effacer -->
   <div class="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-marine/70">
-    <span>{{ liste.length }} article(s)</span>
+    <span>
+      {{ liste.length }} article(s)
+      @if (statutFiltre() === 'TOUS' && nbArchives() > 0) {
+        · <button type="button" (click)="statutFiltre.set('ARCHIVE')" class="font-semibold text-marine hover:underline">{{ nbArchives() }} archivé(s)</button>
+      }
+    </span>
     @if (filtresActifs()) {
       <button type="button" (click)="effacerFiltres()" class="text-xs font-bold uppercase text-brique hover:underline">✕ Effacer les filtres</button>
     }
   </div>
 
-  <!-- Frise : une ligne par article -->
+  @if (erreur()) {
+    <p class="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{{ erreur() }}</p>
+  }
+
+  <!-- Frise : une ligne par article (seulement ceux de la page affichée) -->
   <ol class="mt-3 space-y-3">
-    @for (a of liste; track a.id) {
+    @for (a of lignesPage(); track a.id) {
       <li class="flex flex-col gap-2 rounded-xl border border-ligne bg-white p-4 sm:flex-row sm:items-center sm:gap-4">
         <span class="w-36 shrink-0 text-xs font-bold uppercase tracking-wide text-marine/60">
           {{ a.dateReference | date: 'd MMM y, HH:mm' }}
@@ -65,12 +74,54 @@
           <span class="block font-semibold">{{ a.titre }}</span>
           <span class="block text-xs text-marine/60">{{ a.auteurNomComplet }} · {{ a.categorieNom }}</span>
         </span>
-        <app-status-badge [statut]="a.statut" />
+        <div class="flex items-center gap-3">
+          <app-status-badge [statut]="a.statut" />
+          @if (archivable(a)) {
+            <button type="button" (click)="aArchiver.set(a)" class="text-xs font-bold uppercase text-marine/60 hover:text-marine hover:underline">Archiver</button>
+          }
+        </div>
       </li>
     } @empty {
       <li class="rounded-xl border border-ligne bg-white p-6 text-center text-sm text-marine/60">Aucun article ne correspond à la recherche.</li>
     }
   </ol>
+
+  <!-- Pagination : empilée sur téléphone, sur une ligne à partir de sm -->
+  @if (liste.length > 0) {
+    <div class="mt-4 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+      <label class="flex items-center gap-2 text-marine/70">
+        Afficher
+        <select
+          (change)="taillePage.set(+$any($event.target).value)"
+          class="rounded-md border border-ligne bg-white px-2 py-1.5 text-sm"
+          aria-label="Nombre d'articles par page"
+        >
+          @for (t of taillesPage; track t) {
+            <option [value]="t" [selected]="t === taillePage()">{{ t }}</option>
+          }
+        </select>
+        par page · {{ intervalle() }}
+      </label>
+
+      <div class="flex items-center gap-1">
+        <button type="button" (click)="allerPage(1)" [disabled]="page() <= 1" class="rounded-md border border-ligne bg-white px-2.5 py-1.5 disabled:opacity-40" aria-label="Première page">«</button>
+        <button type="button" (click)="allerPage(page() - 1)" [disabled]="page() <= 1" class="rounded-md border border-ligne bg-white px-3 py-1.5 disabled:opacity-40">‹ Préc.</button>
+        <span class="px-3 font-semibold">Page {{ page() }} / {{ nbPages() }}</span>
+        <button type="button" (click)="allerPage(page() + 1)" [disabled]="page() >= nbPages()" class="rounded-md border border-ligne bg-white px-3 py-1.5 disabled:opacity-40">Suiv. ›</button>
+        <button type="button" (click)="allerPage(nbPages())" [disabled]="page() >= nbPages()" class="rounded-md border border-ligne bg-white px-2.5 py-1.5 disabled:opacity-40" aria-label="Dernière page">»</button>
+      </div>
+    </div>
+  }
 } @else {
   <app-spinner />
+}
+
+@if (aArchiver(); as a) {
+  <app-confirm-dialog
+    titre="Archiver cet article ?"
+    [message]="'« ' + a.titre + ' »' + (a.statut === 'PUBLIE' ? ' sera retiré du site et' : '') + ' n\'apparaîtra plus dans l\'historique (filtre « Archivés » pour le retrouver). Il n\'est pas supprimé.'"
+    libelleConfirmer="Archiver"
+    (confirme)="archiver()"
+    (annule)="aArchiver.set(null)"
+  />
 }

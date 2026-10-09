@@ -13,7 +13,7 @@ module.exports = {
           DEFAULT: '#1B2A4A', // sidebar, boutons, titres
           fonce: '#0F1B33', // footer
         },
-        brique: '#C0392B', // flash info, menu actif, boutons rouges
+        brique: '#C30909', // rouge du logo : flash info, menu actif, boutons rouges
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

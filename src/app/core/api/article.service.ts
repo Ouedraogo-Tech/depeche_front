@@ -47,8 +47,9 @@ export class ArticleService {
   }
 
   // GET /api/articles/publies/{id}
-  obtenirPublie(id: number): Observable<Article> {
-    return this.http.get<Article>(`${this.url}/publies/${id}`);
+  // lien = adresse lisible (slug) de l'article, ou ancien numéro
+  obtenirPublie(lien: string | number): Observable<Article> {
+    return this.http.get<Article>(`${this.url}/publies/${encodeURIComponent(lien)}`);
   }
 
   // ===== Rédaction (journaliste, responsable éditorial) =====

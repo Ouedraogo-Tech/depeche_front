@@ -69,11 +69,11 @@
     </div>
   </div>
 
-  <!-- ===== LIGNE 2 : la barre rouge des rubriques =====
-       Tous les liens sont rouges ; la page ouverte est simplement soulignée en blanc.
+  <!-- ===== LIGNE 2 : la barre bleu foncé des rubriques =====
+       Tous les liens sont blancs ; la page ouverte est simplement soulignée en blanc.
        Pas de défilement : sur ordinateur, les rubriques passent à la ligne DANS la barre (tout reste visible) ;
        sur téléphone, seuls Accueil et À propos y sont, les rubriques sont dans le menu ☰. -->
-  <nav class="bg-brique text-white" aria-label="Rubriques">
+  <nav class="bg-marine-fonce text-white" aria-label="Rubriques">
     <div class="mx-auto flex max-w-7xl flex-wrap items-stretch justify-between px-0 sm:px-6 md:justify-center lg:px-10">
 
       <!-- Accueil (souligné quand on est sur l'accueil sans filtre) -->
@@ -81,7 +81,7 @@
         routerLink="/"
         routerLinkActive="underline decoration-2 underline-offset-8"
         [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }"
-        class="flex shrink-0 items-center px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
+        class="flex shrink-0 items-center px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-white/10 lg:py-5"
       >Accueil</a>
 
       <!-- Actualités ▾ : menu déroulant de TOUTES les rubriques (ordinateur) -->
@@ -90,7 +90,7 @@
           type="button"
           (click)="actualitesOuvert.set(!actualitesOuvert())"
           [attr.aria-expanded]="actualitesOuvert()"
-          class="flex h-full items-center gap-1 px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
+          class="flex h-full items-center gap-1 px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-white/10 lg:py-5"
         >
           Actualités <span class="inline-block text-xs transition-transform" [class.rotate-180]="actualitesOuvert()">▾</span>
         </button>
@@ -113,7 +113,7 @@
           [queryParams]="{ rubrique: r.id }"
           routerLinkActive="underline decoration-2 underline-offset-8"
           [routerLinkActiveOptions]="{ paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored' }"
-          class="hidden shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 md:flex lg:py-5"
+          class="hidden shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-white/10 md:flex lg:py-5"
         >{{ r.nom }}</a>
       }
 
@@ -121,7 +121,7 @@
       <a
         routerLink="/a-propos"
         routerLinkActive="underline decoration-2 underline-offset-8"
-        class="flex shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-black/15 lg:py-5"
+        class="flex shrink-0 items-center whitespace-nowrap px-4 py-4 text-sm font-bold uppercase tracking-wide hover:bg-white/10 lg:py-5"
       >À propos</a>
     </div>
   </nav>

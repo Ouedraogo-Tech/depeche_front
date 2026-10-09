@@ -18,7 +18,7 @@ registerLocaleData(localeFr);
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // withComponentInputBinding : les paramètres d'URL (/articles/:id) arrivent dans les input() des pages
+    // withComponentInputBinding : les paramètres d'URL (/articles/:lien) arrivent dans les input() des pages
     // withInMemoryScrolling : chaque nouvelle page s'ouvre en haut (et non déjà défilée vers le bas)
     provideRouter(
       routes,

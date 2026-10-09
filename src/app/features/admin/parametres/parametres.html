@@ -46,34 +46,39 @@
             <input id="mentionEdition" formControlName="mentionEdition" placeholder="Ex. : Édité par …" class="w-full rounded-md border border-ligne px-3 py-2.5 text-sm focus:border-marine focus:outline-none" />
           </div>
 
-          <!-- ===== Logo du site : 3 versions (vide = logo d'origine) ===== -->
+          <!-- ===== Logo du site : UNE zone d'envoi + le choix de l'emplacement (vide = logo d'origine) ===== -->
           <div class="border-t border-ligne pt-4 md:col-span-2">
             <p class="text-sm font-bold">Logo du site</p>
           </div>
-          @for (l of versionsLogo; track l.champ) {
-            <div class="md:col-span-2">
-              <p class="mb-1 text-xs font-bold uppercase tracking-wide text-marine/70">{{ l.libelle }}</p>
-              <!-- Téléphone : aperçu puis zone d'envoi · à partir de sm : côte à côte -->
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-                <div class="flex h-24 shrink-0 items-center justify-center rounded-lg border border-ligne px-4 sm:w-60" [class]="l.fond">
-                  <img
-                    [src]="logoAffiche(apercu(), l.champ)"
-                    alt="Aperçu du logo"
-                    class="max-h-14 w-auto max-w-full object-contain"
-                    [class]="surPastille(apercu(), l.champ) ? 'rounded bg-white px-1.5 py-1' : ''"
-                  />
-                </div>
-                <div class="min-w-0 flex-1">
-                  <app-image-upload [url]="null" (urlChange)="changerLogo(l.champ, $event)" />
-                  @if (formulaire.controls[l.champ].value) {
-                    <button type="button" (click)="changerLogo(l.champ, null)" class="mt-2 text-xs font-bold uppercase text-brique hover:underline">
-                      Rétablir le logo d'origine
-                    </button>
-                  }
-                </div>
+          <div class="md:col-span-2">
+            <label for="emplacementLogo" class="mb-1 block text-xs font-bold uppercase tracking-wide text-marine/70">Emplacement</label>
+            <select
+              id="emplacementLogo"
+              [value]="emplacementLogo()"
+              (change)="emplacementLogo.set($any($event.target).value)"
+              class="w-full rounded-md border border-ligne bg-white px-3 py-2.5 text-sm focus:border-marine focus:outline-none md:w-1/2"
+            >
+              @for (l of versionsLogo; track l.champ) {
+                <option [value]="l.champ">{{ l.libelle }}</option>
+              }
+            </select>
+
+            <!-- Téléphone : aperçu puis zone d'envoi · à partir de sm : côte à côte -->
+            <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-stretch">
+              <!-- Aperçu : le logo actuel de l'emplacement choisi, sur le fond de cet emplacement -->
+              <div class="flex h-24 shrink-0 items-center justify-center rounded-lg border border-ligne px-4 sm:w-60" [class]="versionChoisie().fond">
+                <img [src]="logoAffiche(apercu(), emplacementLogo())" alt="Aperçu du logo" class="max-h-14 w-auto max-w-full object-contain" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <app-image-upload [url]="null" (urlChange)="changerLogo(emplacementLogo(), $event)" />
+                @if (formulaire.controls[emplacementLogo()].value) {
+                  <button type="button" (click)="changerLogo(emplacementLogo(), null)" class="mt-2 text-xs font-bold uppercase text-brique hover:underline">
+                    Rétablir le logo d'origine
+                  </button>
+                }
               </div>
             </div>
-          }
+          </div>
 
           <!-- ===== Réseaux sociaux : un lien par réseau (vide = logo caché dans le footer) ===== -->
           <div class="border-t border-ligne pt-4 md:col-span-2">
@@ -188,7 +193,7 @@
             <div>
               <dt class="text-xs font-bold uppercase text-marine/60">{{ l.libelle }}</dt>
               <dd class="mt-1 flex h-16 items-center justify-center rounded-lg border border-ligne px-3" [class]="l.fond">
-                <img [src]="logoAffiche(p, l.champ)" alt="Logo" class="max-h-10 w-auto max-w-full object-contain" [class]="surPastille(p, l.champ) ? 'rounded bg-white px-1.5 py-1' : ''" />
+                <img [src]="logoAffiche(p, l.champ)" alt="Logo" class="max-h-10 w-auto max-w-full object-contain" />
               </dd>
             </div>
           }

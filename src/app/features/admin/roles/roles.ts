@@ -19,6 +19,7 @@ const LIBELLES_PERMISSIONS: Record<string, string> = {
   ARTICLE_PUBLIER: 'Publier un article',
   ARTICLE_PLANIFIER: 'Planifier une publication',
   ARTICLE_VALIDER: 'Valider un article',
+  ARTICLE_ARCHIVER: 'Archiver un article',
   ARTICLE_SUPPRIMER: 'Supprimer un article',
   CATEGORIE_CONSULTER: 'Consulter les catégories',
   CATEGORIE_LIRE: 'Lire les catégories',
