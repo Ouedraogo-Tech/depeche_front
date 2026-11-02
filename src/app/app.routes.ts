@@ -274,6 +274,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/parametres/parametres').then((m) => m.AdminParametres),
       },
       {
+        path: 'a-propos',
+        title: 'Page À propos',
+        loadComponent: () => import('./features/webmaster/a-propos/a-propos').then((m) => m.WebmasterAPropos),
+      },
+      {
         path: 'newsletter',
         title: 'Newsletter',
         loadComponent: () => import('./features/webmaster/newsletter/newsletter').then((m) => m.Newsletter),

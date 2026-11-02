@@ -19,7 +19,6 @@
         <li><a routerLink="/" class="hover:text-white">Accueil</a></li>
          <li><a routerLink="/a-propos" class="hover:text-white">À propos</a></li>
         <li><button type="button" (click)="allerANewsletter()" class="hover:text-white">Newsletter</button></li>
-        <li><a routerLink="/connexion" class="hover:text-white">Espace rédaction</a></li>
       </ul>
     </div>
 
@@ -48,8 +47,13 @@
           <li><a [href]="'tel:' + tel" class="hover:text-white">☎ {{ tel }}</a></li>
         }
         @if (parametres().adresse || parametres().ville) {
-          <li>
-            📍 {{ parametres().adresse }}{{ parametres().adresse && parametres().ville ? ', ' : '' }}{{ parametres().ville }}
+          <!-- Icône de localisation dessinée (même couleur que le texte) ; l'adresse reste alignée si elle passe à la ligne -->
+          <li class="flex items-start gap-1.5">
+            <svg class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-7-6.1-7-11.5a7 7 0 1 1 14 0C19 14.9 12 21 12 21z" />
+              <circle cx="12" cy="9.5" r="2.5" />
+            </svg>
+            <span>{{ parametres().adresse }}{{ parametres().adresse && parametres().ville ? ', ' : '' }}{{ parametres().ville }}</span>
           </li>
         }
       </ul>

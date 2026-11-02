@@ -1,84 +1,48 @@
 <div class="mx-auto max-w-5xl">
 
-  <!-- ===== Présentation ===== -->
-  <p class="text-center text-[11px] font-bold uppercase tracking-[0.2em] text-brique">À propos</p>
-  <h1 class="mt-1 text-center font-serif text-3xl font-bold leading-tight sm:text-5xl">
-    {{ parametres()?.nomSite ?? 'Dépêche 226' }}
+  <!-- ===== Présentation : titre aligné à gauche, souligné d'un trait sur toute la largeur ===== -->
+  <h1 class="border-b-2 border-marine pb-4 font-serif text-3xl font-bold leading-tight text-marine sm:pb-6 sm:text-5xl lg:text-6xl">
+    À propos de <span class="uppercase">{{ parametres()?.nomSite ?? 'Dépêche 226' }}</span>
   </h1>
   @if (parametres()?.slogan; as slogan) {
-    <p class="mx-auto mt-4 max-w-2xl text-center text-lg text-marine/80">{{ slogan }}</p>
+    <p class="mt-4 text-lg text-marine/80">{{ slogan }}</p>
   }
 
-  <!-- Notre mission : texte à gauche, chiffres à droite (empilés sur téléphone) -->
-  <div class="mt-12 grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-    <div class="space-y-4 leading-relaxed text-marine/90 lg:col-span-2">
+  <!-- Notre mission : texte rédigé par le webmaster (une ligne vide = nouveau paragraphe) -->
+  @if (paragraphes().length) {
+    <div class="mt-12 max-w-3xl space-y-4 leading-relaxed text-marine/90">
       <h2 class="font-serif text-2xl font-bold text-marine">Notre mission</h2>
-      <p>
-        Dépêche 226 est un média d'information en ligne consacré au Burkina Faso et au Sahel. Notre rôle :
-        informer vite, mais surtout informer juste, sur la politique, l'économie, la société, la culture et le sport.
-      </p>
-      <p>
-        Les articles sont écrits par nos journalistes, puis relus et validés par un responsable éditorial avant
-        d'être publiés. Ce double regard est notre garantie de qualité.
-      </p>
+      @for (p of paragraphes(); track $index) {
+        <p class="whitespace-pre-line">{{ p }}</p>
+      }
     </div>
+  }
 
-    <!-- Les chiffres : 2 côte à côte sur téléphone, empilés à droite sur ordinateur -->
-    <div class="grid grid-cols-2 gap-4 lg:grid-cols-1">
-      <div class="rounded-xl border-t-4 border-brique bg-white p-5 text-center">
-        <p class="font-serif text-4xl font-bold">{{ nbArticles() ?? '—' }}</p>
-        <p class="mt-1 text-xs font-bold uppercase tracking-wide text-marine/60">Articles publiés</p>
-      </div>
-      <div class="rounded-xl border-t-4 border-marine bg-white p-5 text-center">
-        <p class="font-serif text-4xl font-bold">{{ nbRubriques() ?? '—' }}</p>
-        <p class="mt-1 text-xs font-bold uppercase tracking-wide text-marine/60">Rubriques</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== Nos engagements : 1 / 2 / 4 colonnes ===== -->
-  <h2 class="mt-16 text-center font-serif text-2xl font-bold sm:text-3xl">Nos engagements</h2>
-  <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    @for (v of valeurs; track v.titre; let i = $index) {
-      <div class="rounded-xl border border-ligne bg-white p-5">
-        <p class="font-serif text-3xl font-bold text-brique">0{{ i + 1 }}</p>
-        <h3 class="mt-2 font-bold">{{ v.titre }}</h3>
-        <p class="mt-1 text-sm text-marine/70">{{ v.texte }}</p>
+  <!-- Les chiffres : bandeau pleine largeur, colonnes séparées par un trait fin
+       (empilées sur téléphone, côte à côte à partir de sm ; 2 colonnes si l'année de création est vide) -->
+  <dl
+    class="mt-10 grid grid-cols-1 divide-y divide-sable border border-ligne bg-ligne px-6 py-4 sm:divide-x sm:divide-y-0 sm:px-10 sm:py-12"
+    [class]="chiffres().length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'"
+  >
+    @for (c of chiffres(); track c.libelle) {
+      <div class="flex flex-col py-5 sm:px-8 sm:py-0 sm:first:pl-0">
+        <dd class="font-serif text-4xl font-bold leading-none text-marine-fonce sm:text-5xl">{{ c.valeur ?? '—' }}</dd>
+        <dt class="order-last mt-3 text-xs font-semibold uppercase tracking-[0.15em] text-marine/60">{{ c.libelle }}</dt>
       </div>
     }
-  </div>
+  </dl>
 
-  <!-- ===== Nous contacter (Paramètres du site) ===== -->
-  <div class="mt-16 rounded-xl bg-marine-fonce p-6 text-white sm:p-10">
-    <div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center">
-      <div>
-        <h2 class="font-serif text-2xl font-bold sm:text-3xl">Nous contacter</h2>
-        <p class="mt-2 text-white/70">Une information, une correction, une proposition ? La rédaction vous lit.</p>
-      </div>
-
-      <ul class="space-y-3 break-words text-sm sm:text-base">
-        @if (parametres()?.emailContact; as email) {
-          <li><a [href]="'mailto:' + email" class="hover:underline">✉ {{ email }}</a></li>
-        }
-        @if (parametres()?.telephone; as tel) {
-          <li><a [href]="'tel:' + tel" class="hover:underline">☎ {{ tel }}</a></li>
-        }
-        @if (parametres()?.adresse || parametres()?.ville) {
-          <li>
-            📍 {{ parametres()?.adresse }}{{ parametres()?.adresse && parametres()?.ville ? ', ' : '' }}{{ parametres()?.ville }}
-          </li>
-        }
-        @if (!parametres()?.emailContact && !parametres()?.telephone) {
-          <li class="text-white/60">Coordonnées bientôt disponibles.</li>
-        }
-      </ul>
+  <!-- ===== Nos engagements (rédigés par le webmaster) : 1 / 2 / 4 colonnes ===== -->
+  @if (engagements().length) {
+    <h2 class="mt-16 text-center font-serif text-2xl font-bold sm:text-3xl">Nos engagements</h2>
+    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @for (v of engagements(); track $index; let i = $index) {
+        <div class="rounded-xl border border-ligne bg-white p-5">
+          <p class="font-serif text-3xl font-bold text-brique">0{{ i + 1 }}</p>
+          <h3 class="mt-2 font-bold">{{ v.titre }}</h3>
+          <p class="mt-1 text-sm text-marine/70">{{ v.texte }}</p>
+        </div>
+      }
     </div>
-  </div>
-
-  <!-- Appel à l'action -->
-  <p class="mt-10 text-center text-sm text-marine/70">
-    Envie de réagir à l'actualité ?
-    <a routerLink="/inscription" class="font-semibold text-brique hover:underline">Créez votre compte lecteur</a>
-    et commentez nos articles.
-  </p>
+  }
 </div>

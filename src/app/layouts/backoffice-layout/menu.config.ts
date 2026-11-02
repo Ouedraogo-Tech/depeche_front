@@ -58,6 +58,7 @@ export const ESPACES: Partial<Record<RoleName, Espace>> = {
       { libelle: 'Dashboard', chemin: '/webmaster/tableau-de-bord' },
       { libelle: 'Commentaires', chemin: '/webmaster/moderation' },
       { libelle: 'Paramètres du site', chemin: '/webmaster/parametres' },
+      { libelle: 'Page À propos', chemin: '/webmaster/a-propos' },
       { libelle: 'Newsletter', chemin: '/webmaster/newsletter' },
       { libelle: 'Profil', chemin: '/webmaster/profil' },
     ],

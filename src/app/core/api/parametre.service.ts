@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { APropos } from '../models/a-propos.model';
 import { ParametreSite } from '../models/parametre-site.model';
 
 // Les logos d'origine (dossier public/images/logo), utilisés tant que le webmaster n'en a pas envoyé
@@ -58,5 +59,15 @@ export class ParametreService {
   // PUT /api/parametres : webmaster uniquement (les logos du site changent tout de suite)
   modifier(parametres: ParametreSite): Observable<ParametreSite> {
     return this.http.put<ParametreSite>(this.url, parametres).pipe(tap((p) => this.enregistres.set(p)));
+  }
+
+  // GET /api/parametres/a-propos : public
+  obtenirAPropos(): Observable<APropos> {
+    return this.http.get<APropos>(`${this.url}/a-propos`);
+  }
+
+  // PUT /api/parametres/a-propos : webmaster uniquement
+  modifierAPropos(apropos: APropos): Observable<APropos> {
+    return this.http.put<APropos>(`${this.url}/a-propos`, apropos);
   }
 }
